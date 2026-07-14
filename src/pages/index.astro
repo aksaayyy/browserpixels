@@ -2,6 +2,45 @@
 import Layout from '../layouts/Layout.astro';
 import ImageConverter from '../components/ImageConverter.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
+
+/* Single source of truth for the FAQ: this array renders BOTH the visible
+   accordion below and the FAQPage JSON-LD schema, so the structured data can
+   never drift from the on-page text (Google requires them to match for rich
+   results, and penalises mismatches). */
+const faqs = [
+	{
+		question: 'How do I convert HEIC to JPG?',
+		answer: 'Drag a HEIC file onto the converter above (or click to browse), and the tool reads it in your browser and re-encodes it as a standard JPG. The whole process runs client-side using JavaScript and WebAssembly, so your photo never leaves your device. Save the resulting JPG and open it on any Windows PC, Android phone, or browser.',
+	},
+	{
+		question: 'Is it safe to convert HEIC files online?',
+		answer: 'Yes. Our HEIC to JPG converter runs entirely client-side in your browser. Your HEIC files are decoded and re-encoded as JPG on your own device, so they are never transmitted over the internet. There is no server-side processing, no temporary storage, and no third party that can access your photos.',
+	},
+	{
+		question: 'How do I convert HEIC to JPG on Windows?',
+		answer: 'Windows does not open HEIC natively without codecs from the Microsoft Store. Open this page in any Windows browser, drop in your HEIC photos, and download universal JPG files you can open immediately on any Windows PC, Android device, or web browser without installing extra software.',
+	},
+	{
+		question: 'Is this HEIC to JPG converter free?',
+		answer: 'Yes, completely. The HEIC to JPG converter is free with no hidden fees, no sign-up, no watermarks, and no limits on the number of images you can convert. It is supported by ads on the page, never by selling your data.',
+	},
+	{
+		question: 'How do I convert HEIC to JPG on iPhone?',
+		answer: 'On an iPhone, open this page in Safari, tap the converter to pick a photo from your library (or the Files app), and the image is decoded and re-encoded as JPG entirely on the device. Nothing is uploaded, and you can save the finished JPG straight back to Photos or share it as usual.',
+	},
+	{
+		question: 'Can I convert multiple HEIC files at once?',
+		answer: 'Yes. Drop several images onto the converter at the same time and each one is decoded and re-encoded locally, one after another. Because there is no server, you are not capped by a per-day quota the way free server-based converters often limit you.',
+	},
+	{
+		question: 'How do I convert WebP to JPG without losing quality?',
+		answer: 'Drop your WebP file onto the converter and it decodes the image in your browser and re-encodes it as a high-quality JPG. Because the conversion happens locally at full resolution, there is no server-side compression step, so the only quality loss comes from the standard JPG encoding itself. Choose a high quality setting if available to minimize any visible artifacts.',
+	},
+	{
+		question: 'Does this tool upload my photos to a server?',
+		answer: 'No. The converter performs 100% of its work inside your browser. When you select an image, it is read into memory locally and processed there; nothing is ever sent to a server. You can even use the tool offline once the page has loaded.',
+	},
+];
 ---
 
 <Layout>
@@ -96,16 +135,13 @@ import ThemeToggle from '../components/ThemeToggle.tsx';
 						Conversion quality matters as much as convenience. Because this HEIC to JPG converter decodes the original image at full resolution before re-encoding, you keep the detail your camera captured — there is no aggressive downscaling or extra compression pass layered on top. The only quality loss is the unavoidable one built into JPG itself, and for most photos that is invisible to the eye. The same is true on the WebP side: when you convert a WebP file to JPG, the decoded pixels are re-encoded cleanly, so a WebP to JPG converter built for speed does not have to sacrifice fidelity. Converting WebP to PNG is the right move when you need every pixel preserved, since PNG is lossless and the round trip adds no compression artifacts at all.
 					</p>
 					<p>
+						The same engine doubles as a complete WebP converter. Modern websites frequently serve images as WebP because it compresses well, but many editing tools and older devices still prefer JPG or PNG. Use it to convert a WebP file to JPG, or convert to WebP when you want the smaller file size for the web. Prefer the classic extension? The WebP to JPEG path produces the same image with a <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-slate-800">.jpg</code> file your apps already recognize, so a dragging a <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-slate-800">.webp</code> to JPG conversion is just as easy. A dedicated WebP to JPG converter and WebP converter in one tool means a single bookmark covers every direction: WebP to JPG, .webp to JPG, or back to WebP.
+					</p>
+					<p>
 						The tool is also built for real-world workflows, not single-file demos. Dropping in several images at once works the same way as one — each file is decoded and re-encoded locally, in turn, so you can move a whole batch of HEIC photos to JPG without sitting through uploads or hitting a per-day cap that free server-based converters love to enforce. Even if you only ever convert one photo at a time, the absence of a queue, a sign-in, or a waiting screen is the difference between a chore and a non-event.
 					</p>
 					<p>
 						One last point worth making: you might notice this page is mostly text explaining the tool rather than bright banners promising the world. That is deliberate. The converter does exactly one thing and does it privately, and the content here exists to answer the questions people actually ask — how to convert HEIC to JPG, whether it is safe, how it works on Windows, and how it handles WebP — instead of dressing up a file upload form as something it is not. Everything here is free, works on iPhone and Windows, needs no installation, and runs offline once the page has loaded. Whether you landed here to fix one photo or a whole folder, the tool above is all you need.
-					</p>
-					<p>
-						The same engine is a complete WebP converter, too. Modern websites frequently serve images as WebP because it compresses well, but many editing tools and older devices still prefer JPG or PNG. Use it to convert WebP to JPG, convert a WebP file to JPG, or go the other way and convert to WebP. If you would rather keep a lossless format, WebP to PNG gives you a portable PNG instead of a compressed JPG. Prefer the classic JPEG extension? The WebP to JPEG path produces the same image with a <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-slate-800">.jpg</code> file your apps already recognize. A dedicated WebP to JPG converter and WebP converter in one tool means one bookmark covers every direction: WebP to JPG, .webp to JPG, or back to WebP.
-					</p>
-					<p>
-						Everything here is free, works on iPhone and Windows, needs no installation, and can be used offline once the page has loaded. Whether you landed here to convert one photo or to fix a whole folder, the tool above is the only thing you need.
 					</p>
 				</div>
 			</div>
@@ -136,54 +172,51 @@ import ThemeToggle from '../components/ThemeToggle.tsx';
 				</div>
 			</div>
 
-			<!-- Frequently asked questions -->
+			<!-- Frequently asked questions (SEO accordion) — semantic <details>/
+			     <summary> so the questions stay crawlable & accessible without JS,
+			     and they double as click-to-expand UX. Map mirrors the FAQPage
+			     JSON-LD below exactly (single source of truth: the `faqs` array). -->
 			<div>
 				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
 					Frequently asked questions
 				</h2>
-				<div class="mt-4 space-y-6">
-					<div>
-						<h3 class="text-base font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">
-							How do I convert HEIC to JPG?
-						</h3>
-						<p class="mt-1.5 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
-							Drag a HEIC file onto the converter above (or click to browse), and the tool reads it in your browser and re-encodes it as a standard JPG. The whole process runs client-side using JavaScript and WebAssembly, so your photo never leaves your device. Save the resulting JPG and open it on any Windows PC, Android phone, or browser.
-						</p>
-					</div>
-					<div>
-						<h3 class="text-base font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">
-							Is it safe to convert HEIC files online?
-						</h3>
-						<p class="mt-1.5 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
-							Yes. Our HEIC to JPG converter runs entirely client-side in your browser. Your HEIC files are decoded and re-encoded as JPG on your own device, so they are never transmitted over the internet. There is no server-side processing, no temporary storage, and no third party that can access your photos.
-						</p>
-					</div>
-					<div>
-						<h3 class="text-base font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">
-							How do I convert HEIC to JPG on Windows?
-						</h3>
-						<p class="mt-1.5 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
-							Windows does not open HEIC natively without codecs from the Microsoft Store. Open this page in any Windows browser, drop in your HEIC photos, and download universal JPG files you can open immediately on any Windows PC, Android device, or web browser without installing extra software.
-						</p>
-					</div>
-					<div>
-						<h3 class="text-base font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">
-							Is this HEIC to JPG converter free?
-						</h3>
-						<p class="mt-1.5 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
-							Yes, completely. The HEIC to JPG converter is free with no hidden fees, no sign-up, no watermarks, and no limits on the number of images you can convert. It is supported by ads on the page, never by selling your data.
-						</p>
-					</div>
-					<div>
-						<h3 class="text-base font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">
-							How do I convert WebP to JPG without losing quality?
-						</h3>
-						<p class="mt-1.5 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
-							Drop your WebP file onto the converter and it decodes the image in your browser and re-encodes it as a high-quality JPG. Because the conversion happens locally at full resolution, there is no server-side compression step, so the only quality loss comes from the standard JPG encoding itself. Choose a high quality setting if available to minimize any visible artifacts.
-						</p>
-					</div>
+				<div class="mt-5 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 transition-colors duration-300 dark:divide-slate-700 dark:border-slate-700">
+					{faqs.map((faq, i) => (
+						<details class="group bg-white transition-colors duration-300 open:bg-neutral-50 dark:bg-slate-800 dark:open:bg-slate-700/40">
+							<summary
+								class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-neutral-900 transition-colors duration-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-inset dark:text-white dark:hover:bg-slate-700/40 sm:px-6 sm:text-base"
+							>
+								<span>{faq.question}</span>
+								{/* Disclosure marker — rotates on open. aria-hidden as
+								    summary already implies expand/collapse semantics. */}
+								<svg class="h-5 w-5 flex-none text-neutral-400 transition-transform duration-300 group-open:rotate-180 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<polyline points="6 9 12 15 18 9" />
+								</svg>
+							</summary>
+							<div class="px-5 pb-5 pt-0 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:px-6 sm:text-base">
+								{faq.answer}
+							</div>
+						</details>
+					))}
 				</div>
 			</div>
 		</section>
+
+		{/* FAQPage structured data — emitted from the same `faqs` array that
+		    renders the visible accordion above, so Google's rich-result
+		    requirement (schema must match on-page text) is guaranteed by
+		    construction. */}
+		<script type="application/ld+json" is:inline set:html={JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: faqs.map((faq) => ({
+				'@type': 'Question',
+				name: faq.question,
+				acceptedAnswer: {
+					'@type': 'Answer',
+					text: faq.answer,
+				},
+			})),
+		})} />
 	</main>
 </Layout>

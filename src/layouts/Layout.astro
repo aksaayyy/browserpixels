@@ -68,10 +68,9 @@ const ogImageURL = new URL(ogImage, SITE).href;
 		<meta name="twitter:image" content={ogImageURL} />
 		<meta name="twitter:image:alt" content="HEIC to JPG converter — private, no uploads" />
 
-		{/* JSON-LD structured data — a @graph describing the converter app, the
-		    organization behind it, and an FAQ block eligible for rich results.
-		    The visible FAQ text on the homepage mirrors these answers so the
-		    structured data is backed by real, crawlable content. */}
+		{/* JSON-LD structured data — a @graph describing the converter app and the
+		    organization behind it. Page-specific structured data (e.g. FAQPage) is
+		    emitted by individual pages so it stays in sync with their visible text. */}
 		<script type="application/ld+json" set:html={JSON.stringify({
 			'@context': 'https://schema.org',
 			'@graph': [
@@ -104,51 +103,6 @@ const ogImageURL = new URL(ogImage, SITE).href;
 					'@id': SITE + '/#org',
 					name: 'browserpixels',
 					url: SITE,
-				},
-				{
-					'@type': 'FAQPage',
-					mainEntity: [
-						{
-							'@type': 'Question',
-							name: 'How do I convert HEIC to JPG?',
-							acceptedAnswer: {
-								'@type': 'Answer',
-								text: 'Drag a HEIC file onto the converter above (or click to browse), and the tool reads it in your browser and re-encodes it as a standard JPG. The whole thing runs client-side using JavaScript and WebAssembly, so your photo never leaves your device. You can save the resulting JPG and open it on any Windows PC, Android phone, or browser.',
-							},
-						},
-						{
-							'@type': 'Question',
-							name: 'Is it safe to convert HEIC files online?',
-							acceptedAnswer: {
-								'@type': 'Answer',
-								text: 'Yes. Our HEIC to JPG converter runs entirely client-side in your browser. Your HEIC files are decoded and re-encoded as JPG on your own device, so they are never transmitted over the internet. There is no server-side processing, no temporary storage, and no third party that can access your photos.',
-							},
-						},
-						{
-							'@type': 'Question',
-							name: 'How do I convert HEIC to JPG on Windows?',
-							acceptedAnswer: {
-								'@type': 'Answer',
-								text: 'Windows does not open HEIC natively without codecs from the Microsoft Store. Open this page in any Windows browser, drop in your HEIC photos, and download universal JPG files you can open immediately on any Windows PC, Android device, or web browser without installing extra software.',
-							},
-						},
-						{
-							'@type': 'Question',
-							name: 'Is this HEIC to JPG converter free?',
-							acceptedAnswer: {
-								'@type': 'Answer',
-								text: 'Yes, completely. The HEIC to JPG converter is free with no hidden fees, no sign-up, no watermarks, and no limits on the number of images you can convert. It is supported by ads on the page, never by selling your data.',
-							},
-						},
-						{
-							'@type': 'Question',
-							name: 'How do I convert WebP to JPG without losing quality?',
-							acceptedAnswer: {
-								'@type': 'Answer',
-								text: 'Drop your WebP file onto the converter and it decodes the image in your browser and re-encodes it as a high-quality JPG. Because the conversion happens locally at full resolution, there is no server-side compression step, so the only quality loss comes from the standard JPG encoding itself. Choose a high quality setting if available to minimize any visible artifacts.',
-							},
-						},
-					],
 				},
 			],
 		})} />
