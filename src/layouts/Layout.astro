@@ -1,0 +1,209 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	/** <title> text — the single most important on-page SEO signal. */
+	title?: string;
+	/** Meta description — keep under ~155 chars; used for the SERP snippet. */
+	description?: string;
+	/** Comma-separated keywords (low SEO weight, but reinforces topical intent). */
+	keywords?: string;
+	/** Path used to build the canonical URL and og:url, e.g. '/' or '/about'. */
+	canonicalPath?: string;
+	/** Absolute or root-relative URL to the social-share preview image. */
+	ogImage?: string;
+	/** Set true on pages that should not be indexed (e.g. thank-you pages). */
+	noindex?: boolean;
+}
+
+const {
+	title = 'Free HEIC to JPG Converter | Convert HEIC to JPG Online, 100% Private',
+	description = 'Convert HEIC to JPG free and 100% in your browser. No uploads, no sign-up. A private HEIC to JPG converter that also converts WebP to JPG instantly on iPhone and Windows.',
+	keywords = 'HEIC to JPG, convert HEIC to JPG, how to convert HEIC to JPG, HEIC to JPG converter, HEIC converter, how to change HEIC to JPG, how to convert HEIC to JPG on Windows, HEIC to JPG converter free, WebP to PNG, WebP to JPG, convert WebP to JPG, WebP to JPEG, WebP to JPG converter, WebP converter, convert to WebP, WebP file to JPG, .webp to JPG',
+	canonicalPath = '/',
+	ogImage = '/web-app-manifest-512x512.png',
+	noindex = false,
+} = Astro.props;
+
+const SITE = 'https://browserpixels.com';
+const canonicalURL = new URL(canonicalPath, SITE).href;
+const ogImageURL = new URL(ogImage, SITE).href;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<meta name="apple-mobile-web-app-title" content="ImageConvert" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="keywords" content={keywords} />
+		<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+		<meta name="author" content="browserpixels" />
+
+		{/* Canonical URL — tells search engines the preferred version of this page. */}
+		<link rel="canonical" href={canonicalURL} />
+
+		{/* Open Graph — Facebook, LinkedIn, and most social-share previews. */}
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="browserpixels" />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:image" content={ogImageURL} />
+		<meta property="og:image:alt" content="HEIC to JPG converter — private, no uploads" />
+
+		{/* Twitter Card — summary_large_image renders a large preview image. */}
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImageURL} />
+		<meta name="twitter:image:alt" content="HEIC to JPG converter — private, no uploads" />
+
+		{/* JSON-LD structured data — a @graph describing the converter app, the
+		    organization behind it, and an FAQ block eligible for rich results.
+		    The visible FAQ text on the homepage mirrors these answers so the
+		    structured data is backed by real, crawlable content. */}
+		<script type="application/ld+json" set:html={JSON.stringify({
+			'@context': 'https://schema.org',
+			'@graph': [
+				{
+					'@type': 'WebApplication',
+					'@id': canonicalURL + '#app',
+					name: 'Free HEIC to JPG Converter',
+					url: canonicalURL,
+					description: 'Free, 100% private HEIC to JPG converter that runs entirely in your browser. Convert HEIC to JPG and WebP to JPG with no uploads, no sign-up, and no watermarks. Works on iPhone and Windows.',
+					applicationCategory: 'MultimediaApplication',
+					operatingSystem: 'Any (web browser)',
+					browserRequirements: 'Requires JavaScript and WebAssembly support.',
+					offers: {
+						'@type': 'Offer',
+						price: '0',
+						priceCurrency: 'USD',
+					},
+					featureList: [
+						'Convert HEIC to JPG',
+						'WebP to JPG conversion',
+						'WebP to PNG conversion',
+						'100% client-side processing',
+						'No uploads and no sign-up',
+						'Works offline after first load',
+					],
+					publisher: { '@id': SITE + '/#org' },
+				},
+				{
+					'@type': 'Organization',
+					'@id': SITE + '/#org',
+					name: 'browserpixels',
+					url: SITE,
+				},
+				{
+					'@type': 'FAQPage',
+					mainEntity: [
+						{
+							'@type': 'Question',
+							name: 'How do I convert HEIC to JPG?',
+							acceptedAnswer: {
+								'@type': 'Answer',
+								text: 'Drag a HEIC file onto the converter above (or click to browse), and the tool reads it in your browser and re-encodes it as a standard JPG. The whole thing runs client-side using JavaScript and WebAssembly, so your photo never leaves your device. You can save the resulting JPG and open it on any Windows PC, Android phone, or browser.',
+							},
+						},
+						{
+							'@type': 'Question',
+							name: 'Is it safe to convert HEIC files online?',
+							acceptedAnswer: {
+								'@type': 'Answer',
+								text: 'Yes. Our HEIC to JPG converter runs entirely client-side in your browser. Your HEIC files are decoded and re-encoded as JPG on your own device, so they are never transmitted over the internet. There is no server-side processing, no temporary storage, and no third party that can access your photos.',
+							},
+						},
+						{
+							'@type': 'Question',
+							name: 'How do I convert HEIC to JPG on Windows?',
+							acceptedAnswer: {
+								'@type': 'Answer',
+								text: 'Windows does not open HEIC natively without codecs from the Microsoft Store. Open this page in any Windows browser, drop in your HEIC photos, and download universal JPG files you can open immediately on any Windows PC, Android device, or web browser without installing extra software.',
+							},
+						},
+						{
+							'@type': 'Question',
+							name: 'Is this HEIC to JPG converter free?',
+							acceptedAnswer: {
+								'@type': 'Answer',
+								text: 'Yes, completely. The HEIC to JPG converter is free with no hidden fees, no sign-up, no watermarks, and no limits on the number of images you can convert. It is supported by ads on the page, never by selling your data.',
+							},
+						},
+						{
+							'@type': 'Question',
+							name: 'How do I convert WebP to JPG without losing quality?',
+							acceptedAnswer: {
+								'@type': 'Answer',
+								text: 'Drop your WebP file onto the converter and it decodes the image in your browser and re-encodes it as a high-quality JPG. Because the conversion happens locally at full resolution, there is no server-side compression step, so the only quality loss comes from the standard JPG encoding itself. Choose a high quality setting if available to minimize any visible artifacts.',
+							},
+						},
+					],
+				},
+			],
+		})} />
+
+		{/* No-FOUC theme bootstrap — runs synchronously before first paint.
+		    Reads saved preference, then falls back to the OS color-scheme.
+		    Sets `class="dark"` on <html> so Tailwind's `dark:` variant applies
+		    on the very first render (no white flash for dark users). */}
+		<script is:inline>
+			(function () {
+				try {
+					var stored = localStorage.getItem('theme');
+					var prefersDark =
+						window.matchMedia &&
+						window.matchMedia('(prefers-color-scheme: dark)').matches;
+					var theme = stored || (prefersDark ? 'dark' : 'light');
+					if (theme === 'dark') {
+						document.documentElement.classList.add('dark');
+					} else {
+						document.documentElement.classList.remove('dark');
+					}
+					// Reflect the user's choice for the native scrollbar + form controls.
+					document.documentElement.style.colorScheme = theme;
+				} catch (e) {
+					/* localStorage may throw in private mode — silently fall back to light. */
+				}
+			})();
+		</script>
+	</head>
+	<!-- transition-colors on the root so the whole page cross-fades when toggling -->
+	<body class="min-h-screen bg-white text-neutral-900 transition-colors duration-300 antialiased dark:bg-slate-900 dark:text-white">
+		<slot />
+
+		{/* Global site footer — appears on every page. Kept thin (nav + copyright)
+		    so individual pages can still render their own content footers above it. */}
+		<footer class="border-t border-neutral-200 transition-colors duration-300 dark:border-slate-800">
+			<div class="mx-auto flex max-w-3xl flex-col items-center gap-4 px-5 py-8 sm:flex-row sm:justify-between sm:py-10">
+				<p class="text-center text-xs text-neutral-400 transition-colors duration-300 dark:text-slate-500 sm:text-left">
+					&copy; <span>{new Date().getFullYear()}</span> browserpixels &middot; Built for privacy.
+				</p>
+				<nav aria-label="Footer" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
+					<a href="/privacy" class="text-neutral-500 transition-colors duration-300 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-400">
+						Privacy Policy
+					</a>
+					<a href="/terms" class="text-neutral-500 transition-colors duration-300 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-400">
+						Terms & Conditions
+					</a>
+					<a href="/about" class="text-neutral-500 transition-colors duration-300 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-400">
+						About Us
+					</a>
+					<a href="/contact" class="text-neutral-500 transition-colors duration-300 hover:text-emerald-700 dark:text-slate-400 dark:hover:text-emerald-400">
+						Contact Us
+					</a>
+				</nav>
+			</div>
+		</footer>
+	</body>
+</html>

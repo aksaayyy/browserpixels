@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+	title="About | Free Private HEIC to JPG Converter — browserpixels"
+	description="Why we built a 100% browser-based HEIC to JPG converter that converts HEIC to JPG and WebP to JPG with no uploads. Privacy-first image conversion for iPhone and Windows."
+	canonicalPath="/about"
+>
+	<main class="mx-auto max-w-3xl px-5 py-14 transition-colors duration-300 sm:py-20">
+		<header class="mb-10">
+			<div class="mb-6 flex items-center gap-2.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors duration-300 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300 w-fit">
+				<span class="flex h-2 w-2 rounded-full bg-emerald-500" />
+				Privacy-first by necessity
+			</div>
+			<h1 class="text-3xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-4xl">
+				About Us
+			</h1>
+		</header>
+
+		<div class="space-y-6 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
+			<p class="text-base text-neutral-700 transition-colors duration-300 dark:text-slate-200 sm:text-lg">
+				We were tired of uploading our private family photos to sketchy, server-based converters that might steal our data. So we built a 100% browser-based alternative.
+			</p>
+
+			<p>
+				It started with a familiar frustration. You get back from a trip, transfer a folder of photos off your phone, and discover half of them are in HEIC — a format Windows won't open without hunting down codecs from the Microsoft Store. So you search for a "HEIC to JPG converter", and the first results all want the same thing: <em>upload your files to our server and we'll convert them for you.</em>
+			</p>
+
+			<p>
+				That's a hard no for family photos. Once an image leaves your device, you have no idea where it's stored, how long it's kept, who has access to it, or whether it ends up training someone's model. The convenience isn't worth it.
+			</p>
+
+			<p>
+				So we asked a simple question: <strong class="font-semibold text-neutral-900 dark:text-white">why does this need a server at all?</strong> Modern browsers can decode HEIC and WebP through WebAssembly and re-encode them as JPG with no network round trip. The conversion literally never has to touch the internet. We just needed to wire it up and put a clean interface on top.
+			</p>
+
+			<p>
+				The result is The Private Image Converter. It loads once, then runs entirely on your own device. Your photos stay where they belong — on your machine. There's no account, no upload queue, no file-size cap invented to keep someone's server bill down, and no silent copy of your images sitting on a stranger's hard drive.
+			</p>
+
+			<p>
+				We're a small team, and we keep the lights on the honest way: a few ads on the page. That's the trade-off we're willing to make — your data is never for sale, never harvested, never leaves your browser. If you'd rather see no ads, we respect that; the privacy controls in your browser are yours to use.
+			</p>
+
+			<p>
+				If you have a feature request, a question, or just want to tell us this saved you an afternoon, we'd genuinely like to hear from you.
+			</p>
+
+			<div class="not-prose pt-2">
+				<a href="/contact" class="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-colors duration-300 hover:bg-emerald-600 dark:bg-emerald-400 dark:text-emerald-950 dark:shadow-emerald-500/40 dark:hover:bg-emerald-300">
+					Get in touch
+				</a>
+			</div>
+
+			<footer class="pt-8">
+				<a href="/" class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-700 transition-colors duration-300 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300">
+					← Back to the converter
+				</a>
+			</footer>
+		</div>
+	</main>
+</Layout>
