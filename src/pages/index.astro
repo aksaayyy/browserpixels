@@ -140,9 +140,6 @@ const faqs = [
 					<p>
 						The tool is also built for real-world workflows, not single-file demos. Dropping in several images at once works the same way as one — each file is decoded and re-encoded locally, in turn, so you can move a whole batch of HEIC photos to JPG without sitting through uploads or hitting a per-day cap that free server-based converters love to enforce. Even if you only ever convert one photo at a time, the absence of a queue, a sign-in, or a waiting screen is the difference between a chore and a non-event.
 					</p>
-					<p>
-						One last point worth making: you might notice this page is mostly text explaining the tool rather than bright banners promising the world. That is deliberate. The converter does exactly one thing and does it privately, and the content here exists to answer the questions people actually ask — how to convert HEIC to JPG, whether it is safe, how it works on Windows, and how it handles WebP — instead of dressing up a file upload form as something it is not. Everything here is free, works on iPhone and Windows, needs no installation, and runs offline once the page has loaded. Whether you landed here to fix one photo or a whole folder, the tool above is all you need.
-					</p>
 				</div>
 			</div>
 		</section>
@@ -181,7 +178,7 @@ const faqs = [
 					Frequently asked questions
 				</h2>
 				<div class="mt-5 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 transition-colors duration-300 dark:divide-slate-700 dark:border-slate-700">
-					{faqs.map((faq, i) => (
+					{faqs.map((faq) => (
 						<details class="group bg-white transition-colors duration-300 open:bg-neutral-50 dark:bg-slate-800 dark:open:bg-slate-700/40">
 							<summary
 								class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-neutral-900 transition-colors duration-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-inset dark:text-white dark:hover:bg-slate-700/40 sm:px-6 sm:text-base"

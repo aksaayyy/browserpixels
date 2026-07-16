@@ -16,10 +16,24 @@ interface ConvertedImage {
   originalSize: number;
   outputSize: number;
   progress: number; // 0..100
+  oversized?: boolean; // large HEIC — decode may be heavy on low-memory devices
 }
 
 const ACCEPTED = '.heic,.heif,.webp,.jpg,.jpeg,.png';
 const JPEG_QUALITY = 0.9;
+
+/* --- Soft memory guards for in-browser HEIC decode -----------------------------
+ * heic2any decodes HEIC via WebAssembly fully in memory, so peak RAM for one
+ * image can run to several hundred MB before the JPG is emitted. Browsers don't
+ * surface memory pressure from WASM — on older iPhones and low-memory devices a
+ * large batch can exhaust the tab's memory limit and force a reload. We can't
+ * know the device's ceiling, so instead of silently risking a crash we soften
+ * the risk with informed prompts. These are deliberately conservative so the
+ * tool keeps working for normal use (a handful of photos) without nagging.
+ */
+const HEIC_BATCH_WARN_COUNT = 15; // prompt above this many HEIC files in one drop
+const HEIC_BATCH_WARN_BYTES = 150 * 1024 * 1024; // ~150 MB combined HEIC in one drop
+const HEIC_SINGLE_WARN_BYTES = 8 * 1024 * 1024; // ~8 MB ≈ a full-res iPhone photo
 
 /** Heuristically detect HEIC/HEIF regardless of the file extension browsers report. */
 function isHeic(file: File): boolean {
@@ -154,8 +168,31 @@ export default function ImageConverter() {
   };
 
   const processFiles = useCallback(async (fileList: FileList | File[]) => {
-    const incoming = Array.from(fileList);
+    let incoming = Array.from(fileList);
     if (incoming.length === 0) return;
+
+    // --- Soft guard against memory-heavy HEIC batches -----------------------
+    // heic2any decodes each HEIC fully in WASM memory with no streaming, so a
+    // big batch on an older iPhone can exhaust the tab's memory limit and
+    // reload the page. We don't know the device's ceiling, so we surface an
+    // honest prompt instead of silently risking a crash — and let the user
+    // keep converting the lighter files if they'd rather not push it.
+    const heicFiles = incoming.filter(isHeic);
+    const heicBytes = heicFiles.reduce((sum, f) => sum + f.size, 0);
+    const heavyBatch =
+      heicFiles.length > HEIC_BATCH_WARN_COUNT ||
+      heicBytes > HEIC_BATCH_WARN_BYTES;
+    if (heavyBatch) {
+      const proceedHeavy = window.confirm(
+        `You're converting ${heicFiles.length} HEIC photo${heicFiles.length === 1 ? '' : 's'} (${formatBytes(heicBytes)}). ` +
+        `Decoding HEIC happens entirely in your device's memory, and a batch this large can run out of memory and reload the tab on older iPhones or low-memory devices.\n\n` +
+        `• OK — convert them all (one at a time)\n• Cancel — skip the HEIC files and convert the rest`
+      );
+      if (!proceedHeavy) {
+        incoming = incoming.filter((f) => !isHeic(f));
+        if (incoming.length === 0) return; // nothing left to do
+      }
+    }
 
     // Seed state with pending entries keyed by a stable id.
     const pending: ConvertedImage[] = incoming.map((file) => ({
@@ -166,6 +203,7 @@ export default function ImageConverter() {
       originalSize: file.size,
       outputSize: 0,
       progress: 5,
+      oversized: isHeic(file) && file.size > HEIC_SINGLE_WARN_BYTES,
     }));
 
     setBusy(true);
@@ -204,6 +242,10 @@ export default function ImageConverter() {
         );
       } finally {
         stopTick();
+        // Give the browser a chance to reclaim the decoded image's memory
+        // before we decode the next one — meaningful for big HEIC batches on
+        // memory-constrained devices where WASM allocations otherwise pile up.
+        await new Promise((r) => setTimeout(r, 0));
       }
     }
     setBusy(false);
@@ -427,6 +469,12 @@ export default function ImageConverter() {
                       </>
                     )}
                   </div>
+
+                  {item.oversized && item.status !== 'error' && (
+                    <p className="mt-1 truncate text-xs text-amber-600 dark:text-amber-400">
+                      Large HEIC — decoding uses device memory; if the tab reloads on an older phone, convert fewer at once.
+                    </p>
+                  )}
 
                   {/* Progress bar */}
                   <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-neutral-100 transition-colors duration-300 dark:bg-slate-700">

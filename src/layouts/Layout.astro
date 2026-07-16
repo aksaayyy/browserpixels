@@ -75,13 +75,14 @@ const ogImageURL = new URL(ogImage, SITE).href;
 			'@context': 'https://schema.org',
 			'@graph': [
 				{
-					'@type': 'WebApplication',
+					'@type': 'SoftwareApplication',
 					'@id': canonicalURL + '#app',
 					name: 'Free HEIC to JPG Converter',
 					url: canonicalURL,
 					description: 'Free, 100% private HEIC to JPG converter that runs entirely in your browser. Convert HEIC to JPG and WebP to JPG with no uploads, no sign-up, and no watermarks. Works on iPhone and Windows.',
 					applicationCategory: 'MultimediaApplication',
 					operatingSystem: 'Any (web browser)',
+					softwareVersion: '1.0',
 					browserRequirements: 'Requires JavaScript and WebAssembly support.',
 					offers: {
 						'@type': 'Offer',
