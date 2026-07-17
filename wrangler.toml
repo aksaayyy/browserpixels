@@ -1,0 +1,16 @@
+# Cloudflare Workers static deploy — serves the Astro `dist/` build as
+# Workers Static Assets. The site is a fully static output (Astro output:
+# "static"), so there's no Worker script (`main`) to run: every route is a
+# prebuilt HTML file in dist/, and Cloudflare serves them from the edge.
+#
+# Deploy with: npx wrangler deploy
+
+name = "browserpixels"
+compatibility_date = "2026-07-17"
+
+[assets]
+directory = "./dist"
+# For a single-page-app you'd set `handling = "single-page-application"`,
+# but this is a multi-page static site — leave the default SPA fallback off
+# so missing paths 404 instead of falling back to /index.html.
+not_found_handling = "404-page"
