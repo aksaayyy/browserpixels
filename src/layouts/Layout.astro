@@ -14,6 +14,14 @@ interface Props {
 	ogImage?: string;
 	/** Set true on pages that should not be indexed (e.g. thank-you pages). */
 	noindex?: boolean;
+	/** Name of the SoftwareApplication described in this page's JSON-LD. */
+	appName?: string;
+	/** Description of the SoftwareApplication described in this page's JSON-LD. */
+	appDescription?: string;
+	/** Feature list for the SoftwareApplication JSON-LD. */
+	appFeatureList?: string[];
+	/** Stable id suffix for the JSON-LD @id (keeps each page's app entity distinct). */
+	appIdSlug?: string;
 }
 
 const {
@@ -23,6 +31,17 @@ const {
 	canonicalPath = '/',
 	ogImage = '/web-app-manifest-512x512.png',
 	noindex = false,
+	appName = 'Free HEIC to JPG Converter',
+	appDescription = 'Free, 100% private HEIC to JPG converter that runs entirely in your browser. Convert HEIC to JPG and WebP to JPG with no uploads, no sign-up, and no watermarks. Works on iPhone and Windows.',
+	appFeatureList = [
+		'Convert HEIC to JPG',
+		'WebP to JPG conversion',
+		'WebP to PNG conversion',
+		'100% client-side processing',
+		'No uploads and no sign-up',
+		'Works offline after first load',
+	],
+	appIdSlug = 'app',
 } = Astro.props;
 
 const SITE = 'https://browserpixels.com';
@@ -76,10 +95,10 @@ const ogImageURL = new URL(ogImage, SITE).href;
 			'@graph': [
 				{
 					'@type': 'SoftwareApplication',
-					'@id': canonicalURL + '#app',
-					name: 'Free HEIC to JPG Converter',
+					'@id': canonicalURL + '#' + appIdSlug,
+					name: appName,
 					url: canonicalURL,
-					description: 'Free, 100% private HEIC to JPG converter that runs entirely in your browser. Convert HEIC to JPG and WebP to JPG with no uploads, no sign-up, and no watermarks. Works on iPhone and Windows.',
+					description: appDescription,
 					applicationCategory: 'MultimediaApplication',
 					operatingSystem: 'Any (web browser)',
 					softwareVersion: '1.0',
@@ -89,14 +108,7 @@ const ogImageURL = new URL(ogImage, SITE).href;
 						price: '0',
 						priceCurrency: 'USD',
 					},
-					featureList: [
-						'Convert HEIC to JPG',
-						'WebP to JPG conversion',
-						'WebP to PNG conversion',
-						'100% client-side processing',
-						'No uploads and no sign-up',
-						'Works offline after first load',
-					],
+					featureList: appFeatureList,
 					publisher: { '@id': SITE + '/#org' },
 				},
 				{

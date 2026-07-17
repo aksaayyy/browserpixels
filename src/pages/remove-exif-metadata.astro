@@ -1,0 +1,199 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MetadataStripper from '../components/MetadataStripper.tsx';
+import ThemeToggle from '../components/ThemeToggle.tsx';
+
+const faqs = [
+	{
+		question: 'How do I remove GPS location data from a photo?',
+		answer: 'Drop the photo onto the tool above. It scans the file for GPS coordinates, camera details, and other metadata right in your browser, then produces a cleaned copy with that data removed. Because everything runs locally, the photo — and the location it was taken at — never gets sent anywhere.',
+	},
+	{
+		question: 'Is it safe to remove metadata from photos online?',
+		answer: 'Yes, with this tool specifically because it never uploads your file. The scan and the removal both happen on your own device using JavaScript — there is no server in between that could see, log, or retain your photo or its GPS data.',
+	},
+	{
+		question: 'Does removing EXIF data reduce photo quality?',
+		answer: 'No. This tool edits the file at the byte level — it removes the metadata segments (EXIF, XMP, IPTC) and leaves every pixel byte exactly as it was. That is different from tools that redraw your image onto a canvas and re-save it, which silently re-compresses JPEGs and can visibly reduce quality. Here, the output is bit-for-bit identical in the image data, just without the tracking data attached to it.',
+	},
+	{
+		question: 'What metadata does this tool remove?',
+		answer: 'Camera make and model, the exact date and time the photo was taken, GPS latitude and longitude, software/editing history, and any embedded XMP or IPTC data such as author or copyright fields. For JPEG the tool also strips comment segments; for PNG it removes tEXt/iTXt/zTXt/eXIf/tIME chunks; for WebP it removes the EXIF and XMP chunks.',
+	},
+	{
+		question: 'Do I need to remove metadata before posting on Reddit, Instagram, or X?',
+		answer: 'Most large platforms strip EXIF from images uploaded through their own interface, but this has historically had edge cases and bugs, and it never applies to files you share directly (email, Slack, Discord "send as file", or a direct link to an image hosted elsewhere). If you care about not sharing your location, clean the file yourself before uploading rather than relying on a platform to do it for you.',
+	},
+	{
+		question: 'Can I clean multiple photos at once?',
+		answer: 'Yes. Drop several files onto the tool and each one is scanned and cleaned locally, one after another. Download them individually or all together as a ZIP.',
+	},
+	{
+		question: 'Is this metadata remover free?',
+		answer: 'Yes, completely — no sign-up, no watermark, no limit on how many photos you clean. It runs entirely in your browser, so there is no server cost to recover with fees or file-count caps.',
+	},
+];
+---
+
+<Layout
+	title="Remove EXIF & GPS Metadata from Photos — Free, Private, No Upload"
+	description="Strip EXIF, GPS location, and hidden metadata from JPG, PNG, and WebP photos for free, 100% in your browser. No uploads, no quality loss, no sign-up."
+	keywords="remove exif data, remove gps data from photo, strip metadata from photo, exif remover, metadata remover, remove exif online free, delete gps location photo, exif stripper, remove metadata from photo before posting"
+	canonicalPath="/remove-exif-metadata"
+	ogImage="/web-app-manifest-512x512.png"
+	appName="Remove EXIF & GPS Metadata from Photos"
+	appDescription="Free, 100% private EXIF and GPS metadata remover for JPG, PNG, and WebP photos. Runs entirely in the browser with no uploads and no quality loss."
+	appFeatureList={[
+		'Scan photos for EXIF, GPS, XMP, and IPTC metadata',
+		'Remove GPS location data',
+		'Byte-level removal — no pixel re-encoding or quality loss',
+		'100% client-side processing',
+		'No uploads and no sign-up',
+	]}
+	appIdSlug="exif-app"
+>
+	<div class="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
+		<ThemeToggle client:load />
+	</div>
+
+	<main class="mx-auto flex min-h-screen max-w-3xl flex-col px-5 py-14 transition-colors duration-300 sm:py-20">
+		<!-- Hero -->
+		<section class="flex flex-col items-center text-center">
+			<div class="mb-6 flex items-center gap-2.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors duration-300 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+				<span class="flex h-2 w-2 rounded-full bg-emerald-500" />
+				100% Private · Nothing leaves your device
+			</div>
+
+			<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/25 transition-colors duration-300 dark:bg-emerald-400 dark:shadow-emerald-500/40">
+				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+					<path d="M9 12l2 2 4-4" />
+				</svg>
+			</div>
+
+			<h1 class="mt-6 text-3xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-4xl">
+				Remove EXIF & GPS Metadata from Photos
+			</h1>
+			<p class="mt-3 max-w-xl text-base text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-lg">
+				See exactly what your photos reveal — camera, date, GPS location — and strip it out instantly, 100% in your browser. No upload, no quality loss.
+			</p>
+		</section>
+
+		<!-- Tool card -->
+		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
+			<MetadataStripper client:only="react" />
+		</section>
+
+		<!-- Cross-link to the converter -->
+		<section class="mt-6 flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
+			<span>Need to convert HEIC or WebP first?</span>
+			<a href="/" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Open the HEIC/WebP converter →</a>
+		</section>
+
+		<!-- Trust signals -->
+		<section class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<div class="flex flex-col items-center gap-1.5 text-center transition-colors duration-300 sm:items-start sm:text-left">
+				<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors duration-300 dark:bg-slate-800 dark:text-slate-200">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<rect x="3" y="3" width="18" height="18" rx="2" />
+						<path d="M9 9h6v6H9z" />
+					</svg>
+				</span>
+				<h3 class="text-sm font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">100% Client-Side</h3>
+				<p class="text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400">Runs entirely in your browser.</p>
+			</div>
+
+			<div class="flex flex-col items-center gap-1.5 text-center transition-colors duration-300 sm:items-start sm:text-left">
+				<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors duration-300 dark:bg-slate-800 dark:text-slate-200">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+						<path d="M9 12l2 2 4-4" />
+					</svg>
+				</span>
+				<h3 class="text-sm font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">No Quality Loss</h3>
+				<p class="text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400">Pixel data is never re-encoded.</p>
+			</div>
+
+			<div class="flex flex-col items-center gap-1.5 text-center transition-colors duration-300 sm:items-start sm:text-left">
+				<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors duration-300 dark:bg-slate-800 dark:text-slate-200">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<circle cx="12" cy="12" r="9" />
+						<path d="M12 8v4l3 3" />
+					</svg>
+				</span>
+				<h3 class="text-sm font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">Instant</h3>
+				<p class="text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400">No queue, no waiting on a server.</p>
+			</div>
+		</section>
+
+		<!-- SEO content -->
+		<section class="mt-16">
+			<div class="prose-content space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
+				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+					What's actually hiding in your photos
+				</h2>
+				<p>
+					Every photo your phone or camera takes carries a small file of hidden data alongside the pixels, called EXIF metadata. It usually includes the camera or phone model, the exact date and time the photo was taken, software used to edit it, and — if location services were on — the precise GPS coordinates of where you were standing. None of that is visible when you look at the image. It travels silently inside the file until something reads it.
+				</p>
+				<p>
+					That matters more than it seems. A photo posted to a forum, a marketplace listing, or a "send as file" message on Discord or Telegram can carry your home address or workplace inside it without a single word in the caption. Reddit and most major platforms re-encode images on upload and strip this data in standard cases, but that behavior is a courtesy, not a guarantee — it has had documented bugs, it does not apply to direct file shares, and it does not apply at all to email attachments or Slack uploads. The dependable fix is to remove the metadata yourself, before you share the file anywhere.
+				</p>
+				<p>
+					<strong class="font-semibold text-neutral-900 dark:text-white">Why this tool doesn't touch your pixels.</strong> Most "free EXIF remover" sites work by drawing your photo onto an invisible canvas and re-exporting it. That strips metadata as a side effect, but it also re-compresses JPEGs — you lose a little quality every time, even if you never asked for that trade. This tool instead edits the file at the byte level: it finds the exact metadata segments (EXIF, XMP, IPTC, PNG text chunks) and cuts them out, leaving every pixel byte exactly as your camera produced it. The image you download is visually identical to the original — just without the tracking data riding along inside it.
+				</p>
+				<p>
+					The tool also shows you what it found before you download anything. If a photo has GPS coordinates embedded, camera details, or an editing history, those show up as tags so you know exactly what was in the file and exactly what got removed — rather than a blind "clean" button you have to take on faith.
+				</p>
+			</div>
+		</section>
+
+		<!-- How it Works + FAQ -->
+		<section class="mt-16 space-y-10">
+			<div>
+				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+					How it works
+				</h2>
+				<div class="mt-4 space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
+					<p>
+						Drop a JPG, PNG, or WebP photo onto the tool above. It's read into your browser's memory and scanned locally for EXIF, GPS, XMP, and IPTC metadata — nothing is sent anywhere during the scan. Any metadata found is listed as tags so you can see exactly what the file contained. The tool then produces a cleaned copy with those metadata segments removed and the image data untouched, ready to download.
+					</p>
+					<p>
+						<strong class="font-semibold text-neutral-900 dark:text-white">Byte-level removal, not re-encoding.</strong> The tool parses the actual file structure — JPEG markers, PNG chunks, or WebP RIFF chunks — and removes only the segments that carry metadata. Every other byte, including all pixel data, is copied through unchanged. That is what keeps the output at full original quality instead of the soft recompression you get from canvas-based tools.
+					</p>
+				</div>
+			</div>
+
+			<div>
+				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+					Frequently asked questions
+				</h2>
+				<div class="mt-5 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 transition-colors duration-300 dark:divide-slate-700 dark:border-slate-700">
+					{faqs.map((faq) => (
+						<details class="group bg-white transition-colors duration-300 open:bg-neutral-50 dark:bg-slate-800 dark:open:bg-slate-700/40">
+							<summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-neutral-900 transition-colors duration-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-inset dark:text-white dark:hover:bg-slate-700/40 sm:px-6 sm:text-base">
+								<span>{faq.question}</span>
+								<svg class="h-5 w-5 flex-none text-neutral-400 transition-transform duration-300 group-open:rotate-180 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<polyline points="6 9 12 15 18 9" />
+								</svg>
+							</summary>
+							<div class="px-5 pb-5 pt-0 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:px-6 sm:text-base">
+								{faq.answer}
+							</div>
+						</details>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<script type="application/ld+json" is:inline set:html={JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: faqs.map((faq) => ({
+				'@type': 'Question',
+				name: faq.question,
+				acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+			})),
+		})} />
+
+	</main>
+</Layout>

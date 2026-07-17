@@ -2,6 +2,9 @@
 import Layout from '../layouts/Layout.astro';
 import ImageConverter from '../components/ImageConverter.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
+// Layout defaults (title/description/appName/etc.) already describe this
+// page's HEIC/WebP converter, so no props are passed here except the id slug
+// used to keep this page's JSON-LD @id distinct from other tool pages.
 
 /* Single source of truth for the FAQ: this array renders BOTH the visible
    accordion below and the FAQPage JSON-LD schema, so the structured data can
@@ -76,6 +79,12 @@ const faqs = [
 		<!-- Tool card -->
 		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
 			<ImageConverter client:only="react" />
+		</section>
+
+		<!-- Cross-link to the metadata stripper -->
+		<section class="mt-6 flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
+			<span>Sharing the photo afterward?</span>
+			<a href="/remove-exif-metadata" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Strip hidden GPS/EXIF data before you post it →</a>
 		</section>
 
 		<!-- Trust signals -->

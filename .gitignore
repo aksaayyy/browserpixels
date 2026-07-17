@@ -27,3 +27,7 @@ pnpm-debug.log*
 .claude/
 .agents/
 skills-lock.json
+
+# Local verification harness + test photos for the metadata-stripper tool
+test-harness/
+test-photos/
