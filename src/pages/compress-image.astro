@@ -1,0 +1,222 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ImageCompressor from '../components/ImageCompressor.tsx';
+import ThemeToggle from '../components/ThemeToggle.tsx';
+
+const faqs = [
+	{
+		question: 'How do I compress an image to a smaller file size?',
+		answer: 'Drop your JPG, PNG, or WebP onto the tool above. Move the quality slider lower to shrink the file more (at the cost of a little visual detail), or keep it higher for near-original quality with still-meaningful savings. The before/after sizes update live and you download the compressed copy in one click — everything happens in your browser, so the image is never uploaded.',
+	},
+	{
+		question: 'Does this image compressor upload my photos?',
+		answer: 'No. Compression runs entirely on your device using the browser’s built-in Canvas API. Your image is decoded into memory, redrawn onto a canvas, and re-exported at the quality you chose — nothing is ever sent to a server. You can even use it offline once the page has loaded.',
+	},
+	{
+		question: 'What is the best quality setting to compress a JPEG?',
+		answer: 'There is no single number, because it depends on the image, but 70–80% on the slider is a sweet spot for most photos: the file size typically drops 60–80% with no visible artifacts at normal viewing distances. For thumbnails or previews you can go to 50%. The slider re-compresses live, so drag it and watch the before/after number rather than guessing.',
+	},
+	{
+		question: 'Can I compress PNG files?',
+		answer: 'Yes, but PNG is a lossless format, so lowering the quality slider does not change a PNG — the canvas encoder cannot throw away PNG data. To actually shrink a PNG, switch the Output selector to JPEG or WebP, which re-encode the image lossily and can dramatically reduce the size. (Pick JPEG for photos with no transparency; pick WebP if you need to keep transparency.)',
+	},
+	{
+		question: 'Why does my "compressed" image sometimes come out bigger than the original?',
+		answer: 'When an image is already very small or already saved at a low quality, re-encoding it can produce a larger file than you started with — there is no further detail to discard, and the encoder adds its own overhead. The tool shows this honestly with an “already small” note instead of hiding it. In that case the original is already about as compressed as it will get.',
+	},
+	{
+		question: 'Is this image compressor free?',
+		answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you compress. It runs in your browser so there is no server cost to recover with fees or usage caps.',
+	},
+	{
+		question: 'Will compressing my image remove the location data (EXIF/GPS)?',
+		answer: 'Re-encoding through a canvas does strip most metadata as a side effect, including EXIF and GPS, but you should not rely on it as a privacy measure — canvas behavior varies by browser and format. If privacy is the goal, run the file through our dedicated EXIF & GPS remover afterward, which strips the metadata at the byte level and shows you exactly what was removed.',
+	},
+];
+---
+
+<Layout
+	title="Compress Images Online — Free, Private, No Upload"
+	description="Compress JPG, PNG, and WebP images free and 100% in your browser. Reduce image file size with a quality slider, no uploads, no sign-up, no watermark."
+	keywords="image compressor, compress image, reduce image file size, compress JPEG, compress PNG, compress WebP, online image compressor, free image compressor, compress photos, shrink image size, compress image without losing quality"
+	canonicalPath="/compress-image"
+	ogImage="/web-app-manifest-512x512.png"
+	appName="Compress Images Online"
+	appDescription="Free, 100% private image compressor for JPG, PNG, and WebP. Reduce image file size with a quality slider, entirely in the browser with no uploads and no sign-up."
+	appFeatureList={[
+		'Compress JPEG, PNG, and WebP images',
+		'Adjustable quality slider (10% to 100%)',
+		'Live before/after file size comparison',
+		'100% client-side processing via the Canvas API',
+		'No uploads and no sign-up',
+	]}
+	appIdSlug="compress-app"
+>
+	<div class="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
+		<ThemeToggle client:load />
+	</div>
+
+	<main class="mx-auto flex min-h-screen max-w-3xl flex-col px-5 py-14 transition-colors duration-300 sm:py-20">
+		<!-- Hero -->
+		<section class="flex flex-col items-center text-center">
+			<div class="mb-6 flex items-center gap-2.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors duration-300 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+				<span class="flex h-2 w-2 rounded-full bg-emerald-500" />
+				100% Private · Nothing leaves your device
+			</div>
+
+			<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/25 transition-colors duration-300 dark:bg-emerald-400 dark:shadow-emerald-500/40">
+				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+					<polyline points="7 10 12 15 17 10" />
+					<line x1="12" y1="15" x2="12" y2="3" />
+				</svg>
+			</div>
+
+			<h1 class="mt-6 text-3xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-4xl">
+				Compress Images Online
+			</h1>
+			<p class="mt-3 max-w-xl text-base text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-lg">
+				Shrink JPG, PNG, and WebP files in your browser with a quality slider you control. Instant before/after sizes, no uploads, no sign-up, no watermark.
+			</p>
+		</section>
+
+		<!-- Tool card -->
+		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
+			<ImageCompressor client:only="react" />
+		</section>
+
+		<!-- Funnel CTA: privacy cross-link to the EXIF remover -->
+		<section class="mt-6 overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 transition-colors duration-300 dark:border-amber-900/60 dark:bg-amber-950/40 sm:px-6">
+			<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+				<div class="flex items-center gap-3">
+					<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-amber-100 text-amber-700 transition-colors duration-300 dark:bg-amber-900/60 dark:text-amber-300">
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+							<line x1="12" y1="9" x2="12" y2="13" />
+							<line x1="12" y1="17" x2="12.01" y2="17" />
+						</svg>
+					</span>
+					<p class="text-sm text-amber-800 transition-colors duration-300 dark:text-amber-200 sm:text-base">
+						<span class="font-semibold">Compressed your image?</span> Don't forget to protect your privacy — most photos still carry hidden GPS location and camera data.
+					</p>
+				</div>
+				<a
+					href="/remove-exif-metadata"
+					class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"
+				>
+					Strip EXIF & GPS Metadata Now
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<line x1="5" y1="12" x2="19" y2="12" />
+						<polyline points="12 5 19 12 12 19" />
+					</svg>
+				</a>
+			</div>
+		</section>
+
+		<!-- Trust signals -->
+		<section class="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+			<div class="flex flex-col items-center gap-1.5 text-center transition-colors duration-300 sm:items-start sm:text-left">
+				<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors duration-300 dark:bg-slate-800 dark:text-slate-200">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<rect x="3" y="3" width="18" height="18" rx="2" />
+						<path d="M9 9h6v6H9z" />
+					</svg>
+				</span>
+				<h3 class="text-sm font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">100% Client-Side</h3>
+				<p class="text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400">Runs entirely in your browser.</p>
+			</div>
+
+			<div class="flex flex-col items-center gap-1.5 text-center transition-colors duration-300 sm:items-start sm:text-left">
+				<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors duration-300 dark:bg-slate-800 dark:text-slate-200">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+						<path d="M9 12l2 2 4-4" />
+					</svg>
+				</span>
+				<h3 class="text-sm font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">Zero Dependencies</h3>
+				<p class="text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400">Just the native Canvas API.</p>
+			</div>
+
+			<div class="flex flex-col items-center gap-1.5 text-center transition-colors duration-300 sm:items-start sm:text-left">
+				<span class="flex h-10 w-10 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700 transition-colors duration-300 dark:bg-slate-800 dark:text-slate-200">
+					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<circle cx="12" cy="12" r="9" />
+						<path d="M12 8v4l3 3" />
+					</svg>
+				</span>
+				<h3 class="text-sm font-semibold text-neutral-900 transition-colors duration-300 dark:text-white">Instant</h3>
+				<p class="text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400">No queue, no waiting on a server.</p>
+			</div>
+		</section>
+
+		<!-- SEO content -->
+		<section class="mt-16">
+			<div class="prose-content space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
+				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+					Why your images are bigger than they need to be
+				</h2>
+				<p>
+					The photo your phone or camera produces is almost always far larger than what the image actually needs. Cameras save every frame with generous quality headroom so you can edit or print later, and they embed full-resolution data even when the picture is destined for a web page, an email, or a chat where no one will ever look at it pixel-for-pixel. A 6MB JPEG that carries the same visible detail as a 600KB one is wasting 90% of its bytes — and those wasted bytes cost you storage, bandwidth, and load time everywhere you publish them.
+				</p>
+				<p>
+					<strong class="font-semibold text-neutral-900 dark:text-white">How this compressor works.</strong> When you drop an image in, the browser decodes it into memory and draws it onto a canvas. You pick a quality level with the slider, and the canvas is re-exported at that level using <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-slate-700">canvas.toBlob()</code> — the same encoder your browser uses internally, no third-party libraries involved. Lower quality throws away more high-frequency visual detail the eye barely registers, which is where the size savings come from. Because the whole thing is client-side, nothing is uploaded: the image stays on your device the entire time.
+				</p>
+				<p>
+					<strong class="font-semibold text-neutral-900 dark:text-white">Picking a quality level.</strong> For most photos, somewhere in the 70–80% range is the sweet spot: the file typically shrinks by 60–80% with no artifacts you can see at normal viewing distance. Below 50% you start to see blockiness in flat areas like skies and walls. The slider re-compresses live and shows you the before/after size as you drag, so you can stop exactly where the trade-off stops being worth it to you — rather than trusting a preset that someone else chose for a different image.
+				</p>
+				<p>
+					One honest caveat: re-encoding through a canvas is lossy, and occasionally the "compressed" output ends up <em>larger</em> than the original — this happens when the input was already tiny or already saved at a low quality, so there's nothing left to discard. The tool shows that plainly with an "already small" note instead of pretending it shrank. And if you came here to reduce file size for privacy reasons specifically, the canvas re-encode does strip most EXIF as a side effect, but you shouldn't rely on that — use the dedicated metadata remover linked below to strip GPS and camera data at the byte level and see exactly what was removed.
+				</p>
+			</div>
+		</section>
+
+		<!-- How it Works + FAQ -->
+		<section class="mt-16 space-y-10">
+			<div>
+				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+					How it works
+				</h2>
+				<div class="mt-4 space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
+					<p>
+						Drop a JPG, PNG, or WebP onto the tool (or click to browse). Set the output format — leave it on "Match input" to keep the same format, or switch to JPEG or WebP to re-encode lossily for a smaller file. Move the quality slider to target your trade-off between size and visible detail. The tool decodes the image locally, draws it to an off-screen canvas, and re-exports it at the chosen quality entirely in your browser, then shows the before/after file sizes and a percentage reduction. Download the compressed copy with one click.
+					</p>
+					<p>
+						<strong class="font-semibold text-neutral-900 dark:text-white">No servers, no uploads.</strong> The Canvas API is built into every modern browser, so compression needs no npm image library and no backend. That keeps it instant, free, and private — your photos never travel across the network, and you can use the tool offline after the first page load.
+					</p>
+				</div>
+			</div>
+
+			<div>
+				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+					Frequently asked questions
+				</h2>
+				<div class="mt-5 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 transition-colors duration-300 dark:divide-slate-700 dark:border-slate-700">
+					{faqs.map((faq) => (
+						<details class="group bg-white transition-colors duration-300 open:bg-neutral-50 dark:bg-slate-800 dark:open:bg-slate-700/40">
+							<summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-neutral-900 transition-colors duration-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-inset dark:text-white dark:hover:bg-slate-700/40 sm:px-6 sm:text-base">
+								<span>{faq.question}</span>
+								<svg class="h-5 w-5 flex-none text-neutral-400 transition-transform duration-300 group-open:rotate-180 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<polyline points="6 9 12 15 18 9" />
+								</svg>
+							</summary>
+							<div class="px-5 pb-5 pt-0 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:px-6 sm:text-base">
+								{faq.answer}
+							</div>
+						</details>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<script type="application/ld+json" is:inline set:html={JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: faqs.map((faq) => ({
+				'@type': 'Question',
+				name: faq.question,
+				acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+			})),
+		})} />
+
+	</main>
+</Layout>

@@ -84,10 +84,16 @@ const faqs = [
 			<MetadataStripper client:only="react" />
 		</section>
 
-		<!-- Cross-link to the converter -->
-		<section class="mt-6 flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
-			<span>Need to convert HEIC or WebP first?</span>
-			<a href="/" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Open the HEIC/WebP converter →</a>
+		<!-- Cross-link to the converter + compressor (funnel loop) -->
+		<section class="mt-6 space-y-2">
+			<div class="flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
+				<span>Need to convert HEIC or WebP first?</span>
+				<a href="/" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Open the HEIC/WebP converter →</a>
+			</div>
+			<div class="flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
+				<span>Want to make the file smaller too?</span>
+				<a href="/compress-image" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Compress your image →</a>
+			</div>
 		</section>
 
 		<!-- Trust signals -->
