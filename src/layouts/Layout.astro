@@ -45,7 +45,17 @@ const {
 } = Astro.props;
 
 const SITE = 'https://browserpixels.com';
-const canonicalURL = new URL(canonicalPath, SITE).href;
+// Normalize the canonical to the form Cloudflare Workers Assets actually
+// serves: directory-style with a trailing slash for subpaths (e.g.
+// /remove-exif-metadata/). The no-slash form 307-redirects to the slash
+// form on the platform, so canonicalizing to the slash form avoids a
+// redirect on the canonical target — and matches what @astrojs/sitemap
+// emits and what the og:url + JSON-LD @id URLs resolve to.
+const _canonical = new URL(canonicalPath, SITE);
+if (_canonical.pathname !== '/' && !_canonical.pathname.endsWith('/')) {
+	_canonical.pathname += '/';
+}
+const canonicalURL = _canonical.href;
 const ogImageURL = new URL(ogImage, SITE).href;
 ---
 
