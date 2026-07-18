@@ -81,10 +81,16 @@ const faqs = [
 			<ImageConverter client:only="react" />
 		</section>
 
-		<!-- Cross-link to the metadata stripper -->
-		<section class="mt-6 flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
-			<span>Sharing the photo afterward?</span>
-			<a href="/remove-exif-metadata" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Strip hidden GPS/EXIF data before you post it →</a>
+		<!-- Cross-link to the metadata stripper + resizer -->
+		<section class="mt-6 space-y-2">
+			<div class="flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
+				<span>Sharing the photo afterward?</span>
+				<a href="/remove-exif-metadata" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Strip hidden GPS/EXIF data before you post it →</a>
+			</div>
+			<div class="flex items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-200 px-4 py-3 text-center text-sm text-neutral-500 transition-colors duration-300 dark:border-slate-700 dark:text-slate-400">
+				<span>Need it at specific dimensions?</span>
+				<a href="/resize-image" class="font-semibold text-emerald-600 underline-offset-2 hover:underline dark:text-emerald-400">Resize your image here →</a>
+			</div>
 		</section>
 
 		<!-- Trust signals -->
