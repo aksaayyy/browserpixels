@@ -37,6 +37,38 @@ const MODE_LABEL: Record<ResizeMode, string> = {
   percent: 'Percentage Scale',
 };
 
+type PresetKey =
+  | 'custom'
+  | 'instagram-square'
+  | 'instagram-story'
+  | 'twitter-post'
+  | 'discord-emoji'
+  | 'hd-wallpaper'
+  | 'email-attachment';
+
+interface Preset {
+  key: PresetKey;
+  label: string;
+  mode: ResizeMode;
+  /** fixed pixels, applied only in dimensions mode */
+  width?: number;
+  height?: number;
+  /** applied only in percent mode */
+  percent?: number;
+  /** lock aspect to the preset's own ratio (not the source's) */
+  lockAspect?: boolean;
+}
+
+const PRESETS: Preset[] = [
+  { key: 'custom', label: 'Custom (Manual)', mode: 'dimensions' },
+  { key: 'instagram-square', label: 'Instagram Square (1080×1080)', mode: 'dimensions', width: 1080, height: 1080, lockAspect: true },
+  { key: 'instagram-story', label: 'Instagram Story / Reel (1080×1920)', mode: 'dimensions', width: 1080, height: 1920, lockAspect: true },
+  { key: 'twitter-post', label: 'Twitter / X Post (1600×900)', mode: 'dimensions', width: 1600, height: 900, lockAspect: true },
+  { key: 'discord-emoji', label: 'Discord Emoji (128×128)', mode: 'dimensions', width: 128, height: 128, lockAspect: false },
+  { key: 'hd-wallpaper', label: 'HD Wallpaper 1080p (1920×1080)', mode: 'dimensions', width: 1920, height: 1080, lockAspect: true },
+  { key: 'email-attachment', label: 'Email Attachment (Scale down 50%)', mode: 'percent', percent: 50 },
+];
+
 export default function ImageResizer() {
   const [source, setSource] = useState<SourceInfo | null>(null);
   const [status, setStatus] = useState<Status>('ready');
@@ -48,6 +80,7 @@ export default function ImageResizer() {
   const [heightInput, setHeightInput] = useState('');
   const [maintainAspect, setMaintainAspect] = useState(true);
   const [percent, setPercent] = useState(50);
+  const [preset, setPreset] = useState<PresetKey>('custom');
 
   const [result, setResult] = useState<ResizeResult | null>(null);
   const [resultId, setResultId] = useState<string>('');
@@ -173,7 +206,28 @@ export default function ImageResizer() {
     setHeightInput('');
     setPercent(50);
     setMaintainAspect(true);
+    setPreset('custom');
     if (inputRef.current) inputRef.current.value = '';
+  };
+
+  const applyPreset = (key: PresetKey) => {
+    setPreset(key);
+    const p = PRESETS.find((x) => x.key === key);
+    if (!p || key === 'custom') return;
+    setMode(p.mode);
+    if (p.mode === 'dimensions') {
+      setWidthInput(String(p.width ?? ''));
+      setHeightInput(String(p.height ?? ''));
+      // Aspect lock behavior: emoji presets force unlock, others lock to the
+      // preset's exact ratio regardless of the source's original aspect.
+      if (p.lockAspect === false) {
+        setMaintainAspect(false);
+      } else {
+        setMaintainAspect(true);
+      }
+    } else if (p.mode === 'percent' && typeof p.percent === 'number') {
+      setPercent(p.percent);
+    }
   };
 
   const canResize =
@@ -304,6 +358,35 @@ export default function ImageResizer() {
             />
           </div>
 
+          {/* Quick Presets */}
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50/40 p-4 transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900/40 sm:p-5">
+            <label
+              htmlFor="preset-select"
+              className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500 transition-colors duration-300 dark:text-slate-400"
+            >
+              Quick Presets
+            </label>
+            <select
+              id="preset-select"
+              value={preset}
+              onChange={(e) => applyPreset(e.target.value as PresetKey)}
+              className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors duration-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            >
+              {PRESETS.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+            <p className="mt-2 text-xs text-neutral-500 transition-colors duration-300 dark:text-slate-400">
+              {preset === 'custom'
+                ? 'Pick a preset to auto-fill dimensions, or set your own below.'
+                : `Preset applied — adjust manually below if needed. Aspect ratio is ${
+                    PRESETS.find((p) => p.key === preset)?.lockAspect === false ? 'unlocked' : 'locked to the preset'
+                  }.`}
+            </p>
+          </div>
+
           {/* Mode toggle */}
           <div className="rounded-xl border border-neutral-200 bg-neutral-50/40 p-4 transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900/40 sm:p-5">
             <div className="flex flex-wrap items-center gap-2">
@@ -316,7 +399,10 @@ export default function ImageResizer() {
                   <button
                     key={m}
                     type="button"
-                    onClick={() => setMode(m)}
+                    onClick={() => {
+                      setMode(m);
+                      setPreset('custom');
+                    }}
                     className={[
                       'rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-300',
                       active
@@ -343,7 +429,10 @@ export default function ImageResizer() {
                       min={1}
                       inputMode="numeric"
                       value={widthInput}
-                      onChange={(e) => setWidthInput(e.target.value)}
+                      onChange={(e) => {
+                        setWidthInput(e.target.value);
+                        setPreset('custom');
+                      }}
                       className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors duration-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </label>
@@ -356,7 +445,10 @@ export default function ImageResizer() {
                       min={1}
                       inputMode="numeric"
                       value={heightInput}
-                      onChange={(e) => setHeightInput(e.target.value)}
+                      onChange={(e) => {
+                        setHeightInput(e.target.value);
+                        setPreset('custom');
+                      }}
                       className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors duration-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </label>
@@ -364,7 +456,10 @@ export default function ImageResizer() {
                     <input
                       type="checkbox"
                       checked={maintainAspect}
-                      onChange={(e) => setMaintainAspect(e.target.checked)}
+                      onChange={(e) => {
+                        setMaintainAspect(e.target.checked);
+                        setPreset('custom');
+                      }}
                       className="h-4 w-4 rounded accent-emerald-500"
                     />
                     Maintain aspect ratio
@@ -398,7 +493,10 @@ export default function ImageResizer() {
                   max={200}
                   step={1}
                   value={percent}
-                  onChange={(e) => setPercent(Number(e.target.value))}
+                  onChange={(e) => {
+                    setPercent(Number(e.target.value));
+                    setPreset('custom');
+                  }}
                   className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-emerald-500 dark:bg-slate-700"
                 />
                 <span className="w-12 text-right text-sm font-semibold tabular-nums text-neutral-900 transition-colors duration-300 dark:text-white">

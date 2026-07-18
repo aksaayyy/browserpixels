@@ -44,10 +44,32 @@ const FORMAT_LABEL: Record<CompressFormat, string> = {
 	webp: 'WebP',
 };
 
+type QualityPresetKey =
+	| 'custom'
+	| 'small'
+	| 'medium'
+	| 'high'
+	| 'max-compression';
+
+interface QualityPreset {
+	key: QualityPresetKey;
+	label: string;
+	quality: number;
+}
+
+const QUALITY_PRESETS: QualityPreset[] = [
+	{ key: 'custom', label: 'Custom Quality (Slider)', quality: 80 },
+	{ key: 'small', label: 'Small (Email/Web) — ~45%', quality: 45 },
+	{ key: 'medium', label: 'Medium — ~70%', quality: 70 },
+	{ key: 'high', label: 'High Quality — ~90%', quality: 90 },
+	{ key: 'max-compression', label: 'Maximum Compression — ~10%', quality: 10 },
+];
+
 export default function ImageCompressor() {
 	const [items, setItems] = useState<CompressedItem[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [quality, setQuality] = useState(80); // 1–100 (slider range), maps to 0–1
+	const [qualityPreset, setQualityPreset] = useState<QualityPresetKey>('custom');
 	const [outputFmt, setOutputFmt] = useState<CompressFormat | 'keep'>('keep');
 	const [busy, setBusy] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -160,6 +182,12 @@ export default function ImageCompressor() {
 		setItems([]);
 	};
 
+	const applyQualityPreset = (key: QualityPresetKey) => {
+		setQualityPreset(key);
+		const p = QUALITY_PRESETS.find((x) => x.key === key);
+		if (p) setQuality(p.quality);
+	};
+
 	const doneCount = items.filter((it) => it.status === 'done').length;
 	const totalOrig = items
 		.filter((it) => it.status === 'done')
@@ -176,6 +204,33 @@ export default function ImageCompressor() {
 		<div className="w-full">
 			{/* Quality + format controls */}
 			<div className="rounded-xl border border-neutral-200 bg-neutral-50/40 p-4 transition-colors duration-300 dark:border-slate-700 dark:bg-slate-900/40 sm:p-5">
+				{/* Quick Presets / Target Size */}
+				<div className="mb-4">
+					<label
+						htmlFor="quality-preset"
+						className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500 transition-colors duration-300 dark:text-slate-400"
+					>
+						Quick Presets / Target Size
+					</label>
+					<select
+						id="quality-preset"
+						value={qualityPreset}
+						onChange={(e) => applyQualityPreset(e.target.value as QualityPresetKey)}
+						className="w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors duration-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+					>
+						{QUALITY_PRESETS.map((p) => (
+							<option key={p.key} value={p.key}>
+								{p.label}
+							</option>
+						))}
+					</select>
+					<p className="mt-2 text-xs text-neutral-500 transition-colors duration-300 dark:text-slate-400">
+						{qualityPreset === 'custom'
+							? 'Pick a target size to set the slider, or fine-tune it yourself below.'
+							: 'Preset applied — drag the slider to fine-tune and it snaps back to Custom.'}
+					</p>
+				</div>
+
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex flex-wrap items-center gap-2">
 						<span className="text-xs font-semibold uppercase tracking-wide text-neutral-500 transition-colors duration-300 dark:text-slate-400">
@@ -215,7 +270,10 @@ export default function ImageCompressor() {
 							max={100}
 							step={5}
 							value={quality}
-							onChange={(e) => setQuality(Number(e.target.value))}
+							onChange={(e) => {
+								setQuality(Number(e.target.value));
+								setQualityPreset('custom');
+							}}
 							disabled={pngOnly}
 							className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-700"
 						/>
