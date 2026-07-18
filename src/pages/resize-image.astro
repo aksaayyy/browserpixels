@@ -1,56 +1,57 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import ImageCompressor from '../components/ImageCompressor.tsx';
+import ImageResizer from '../components/ImageResizer.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
 
 const faqs = [
 	{
-		question: 'How do I compress an image to a smaller file size?',
-		answer: 'Drop your JPG, PNG, or WebP onto the tool above. Move the quality slider lower to shrink the file more (at the cost of a little visual detail), or keep it higher for near-original quality with still-meaningful savings. The before/after sizes update live and you download the compressed copy in one click — everything happens in your browser, so the image is never uploaded.',
+		question: 'How do I resize an image without losing quality?',
+		answer: 'Drop your JPG, PNG, or WebP onto the tool above and pick one of two modes: Exact Dimensions (type a width and height in pixels, with an optional "maintain aspect ratio" lock) or Percentage Scale (drag a slider to shrink to e.g. 50% of the original). The tool decodes your image locally, redraws it onto a canvas at the target size, and re-exports it — entirely in your browser, so the file is never uploaded. Downsizing always looks sharp because there are more source pixels than target pixels; enlarging past the original will start to look soft, which is a property of scaling, not a bug.',
 	},
 	{
-		question: 'Does this image compressor upload my photos?',
-		answer: 'No. Compression runs entirely on your device using the browser’s built-in Canvas API. Your image is decoded into memory, redrawn onto a canvas, and re-exported at the quality you chose — nothing is ever sent to a server. You can even use it offline once the page has loaded.',
+		question: 'Does this image resizer upload my photos?',
+		answer: 'No. Resizing runs entirely on your device using the browser’s built-in Canvas API. Your image is decoded into memory, drawn onto a canvas at the size you chose, and re-exported — nothing is ever sent to a server. You can even use the tool offline once the page has loaded.',
 	},
 	{
-		question: 'What is the best quality setting to compress a JPEG?',
-		answer: 'There is no single number, because it depends on the image, but 70–80% on the slider is a sweet spot for most photos: the file size typically drops 60–80% with no visible artifacts at normal viewing distances. For thumbnails or previews you can go to 50%. The slider re-compresses live, so drag it and watch the before/after number rather than guessing.',
+		question: 'Should I use exact dimensions or a percentage scale?',
+		answer: 'Use exact dimensions when you have a target slot to fill — a featured image that must be 1200×630 for social, a thumbnail that must be 800×600, an email header of a fixed width. Use percentage scale when you just want "half the size" or "a third the size" without caring about the precise pixel count, which is common for shrinking photos before emailing or messaging them. Both modes keep the aspect ratio by default so nothing ends up stretched.',
 	},
 	{
-		question: 'Can I compress PNG files?',
-		answer: 'Yes, but PNG is a lossless format, so lowering the quality slider does not change a PNG — the canvas encoder cannot throw away PNG data. To actually shrink a PNG, switch the Output selector to JPEG or WebP, which re-encode the image lossily and can dramatically reduce the size. (Pick JPEG for photos with no transparency; pick WebP if you need to keep transparency.)',
+		question: 'What happens to transparency when I resize a PNG or WebP?',
+		answer: 'PNG and WebP both support an alpha channel, and the canvas preserves transparency when you resize into either format — a transparent PNG resized stays transparent. If you have a transparent image and need a JPEG instead, JPEG has no alpha channel, so transparent pixels are filled with white (not black) to keep the result looking clean. Keep the output as PNG or WebP if you need the transparency to survive.',
 	},
 	{
-		question: 'Why does my "compressed" image sometimes come out bigger than the original?',
-		answer: 'When an image is already very small or already saved at a low quality, re-encoding it can produce a larger file than you started with — there is no further detail to discard, and the encoder adds its own overhead. The tool shows this honestly with an “already small” note instead of hiding it. In that case the original is already about as compressed as it will get.',
+		question: 'Is there a file size or resolution limit?',
+		answer: 'There is no artificial upload limit because nothing uploads — the only constraint is your device’s available memory for decoding a very large image. Photos from a modern phone (4000×3000 and up) resize in under a second. If you queue an enormous file and the tab hangs, it is usually the device running low on memory rather than the tool being slow.',
 	},
 	{
-		question: 'Is this image compressor free?',
-		answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you compress. It runs in your browser so there is no server cost to recover with fees or usage caps.',
+		question: 'Is this image resizer free?',
+		answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you resize. It runs in your browser so there is no server cost to recover with fees or usage caps.',
 	},
 	{
-		question: 'Will compressing my image remove the location data (EXIF/GPS)?',
-		answer: 'Re-encoding through a canvas does strip most metadata as a side effect, including EXIF and GPS, but you should not rely on it as a privacy measure — canvas behavior varies by browser and format. If privacy is the goal, run the file through our dedicated EXIF & GPS remover afterward, which strips the metadata at the byte level and shows you exactly what was removed.',
+		question: 'Should I compress my image after resizing it?',
+		answer: 'Resizing changes the pixel dimensions; compression changes the file size. They solve different problems, and you often want both — resize to the right dimensions for where the image will be shown, then compress to drop the remaining bytes. If you resized for the web, fire the image through our compressor next to shrink the file size as well.',
 	},
 ];
 ---
 
 <Layout
-	title="Compress Images Online — Free, Private, No Upload"
-	description="Compress JPG, PNG, and WebP images free and 100% in your browser. Reduce image file size with a quality slider, no uploads, no sign-up, no watermark."
-	keywords="image compressor, compress image, reduce image file size, compress JPEG, compress PNG, compress WebP, online image compressor, free image compressor, compress photos, shrink image size, compress image without losing quality"
-	canonicalPath="/compress-image"
+	title="Resize Images Online — Free, Private, No Upload"
+	description="Resize JPG, PNG, and WebP images free and 100% in your browser. Change image dimensions or scale by percentage — no uploads, no sign-up, no watermark."
+	keywords="resize image, image resizer, change image dimensions, scale image, resize JPEG, resize PNG, resize WebP, resize image online, free image resizer, resize photo, image size changer, resize image to specific size"
+	canonicalPath="/resize-image"
 	ogImage="/web-app-manifest-512x512.png"
-	appName="Compress Images Online"
-	appDescription="Free, 100% private image compressor for JPG, PNG, and WebP. Reduce image file size with a quality slider, entirely in the browser with no uploads and no sign-up."
+	appName="Resize Images Online"
+	appDescription="Free, 100% private image resizer for JPG, PNG, and WebP. Change image dimensions or scale by percentage entirely in the browser with no uploads and no sign-up."
 	appFeatureList={[
-		'Compress JPEG, PNG, and WebP images',
-		'Adjustable quality slider (10% to 100%)',
-		'Live before/after file size comparison',
+		'Resize JPEG, PNG, and WebP images',
+		'Exact dimensions (width × height) with aspect-ratio lock',
+		'Percentage scale (1%–200%)',
+		'Live original → new dimension preview',
 		'100% client-side processing via the Canvas API',
 		'No uploads and no sign-up',
 	]}
-	appIdSlug="compress-app"
+	appIdSlug="resize-app"
 >
 	<div class="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
 		<ThemeToggle client:load />
@@ -66,47 +67,47 @@ const faqs = [
 
 			<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/25 transition-colors duration-300 dark:bg-emerald-400 dark:shadow-emerald-500/40">
 				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-					<polyline points="7 10 12 15 17 10" />
-					<line x1="12" y1="15" x2="12" y2="3" />
+					<rect x="3" y="3" width="18" height="18" rx="2" />
+					<path d="M3 9h18" />
+					<path d="M9 21V9" />
 				</svg>
 			</div>
 
 			<h1 class="mt-6 text-3xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-4xl">
-				Compress Images Online
+				Resize Images Online
 			</h1>
 			<p class="mt-3 max-w-xl text-base text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-lg">
-				Shrink JPG, PNG, and WebP files in your browser with a quality slider you control. Instant before/after sizes, no uploads, no sign-up, no watermark.
+				Change the dimensions of JPG, PNG, and WebP images in your browser — exact pixels or a percentage scale. Live before/after sizes, no uploads, no sign-up, no watermark.
 			</p>
 		</section>
 
 		<!-- Tool card -->
 		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
-			<ImageCompressor client:only="react" />
+			<ImageResizer client:only="react" />
 		</section>
 
-		<!-- Funnel CTAs: cross-link the triangle (Resizer + EXIF stripper) -->
+		<!-- Funnel CTAs: cross-link the triangle (Compressor + EXIF stripper) -->
 		<section class="mt-6 space-y-2">
-			<!-- CTA → Resizer -->
+			<!-- CTA 1 → Compressor -->
 			<div class="overflow-hidden rounded-2xl border border-sky-200 bg-sky-50 px-5 py-5 transition-colors duration-300 dark:border-sky-900/60 dark:bg-sky-950/40 sm:px-6">
 				<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
 					<div class="flex items-center gap-3">
 						<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-sky-100 text-sky-700 transition-colors duration-300 dark:bg-sky-900/60 dark:text-sky-300">
 							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<rect x="3" y="3" width="18" height="18" rx="2" />
-								<path d="M3 9h18" />
-								<path d="M9 21V9" />
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+								<polyline points="7 10 12 15 17 10" />
+								<line x1="12" y1="15" x2="12" y2="3" />
 							</svg>
 						</span>
 						<p class="text-sm text-sky-800 transition-colors duration-300 dark:text-sky-200 sm:text-base">
-							<span class="font-semibold">Need specific dimensions?</span> Resize your image to exact pixels or a percentage scale before (or after) you compress.
+							<span class="font-semibold">Resized your image?</span> Now make it load instantly — compress it to a fraction of the file size.
 						</p>
 					</div>
 					<a
-						href="/resize-image"
+						href="/compress-image"
 						class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-400"
 					>
-						Resize your image here
+						Compress this image now
 						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 							<line x1="5" y1="12" x2="19" y2="12" />
 							<polyline points="12 5 19 12 12 19" />
@@ -115,7 +116,7 @@ const faqs = [
 				</div>
 			</div>
 
-			<!-- CTA → EXIF stripper -->
+			<!-- CTA 2 → EXIF stripper -->
 			<div class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 transition-colors duration-300 dark:border-amber-900/60 dark:bg-amber-950/40 sm:px-6">
 				<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
 					<div class="flex items-center gap-3">
@@ -127,7 +128,7 @@ const faqs = [
 							</svg>
 						</span>
 						<p class="text-sm text-amber-800 transition-colors duration-300 dark:text-amber-200 sm:text-base">
-							<span class="font-semibold">Compressed your image?</span> Don't forget to protect your privacy — most photos still carry hidden GPS location and camera data.
+							<span class="font-semibold">Protect your privacy.</span> Resized or not, your photo may still carry hidden GPS location and camera data — strip it.
 						</p>
 					</div>
 					<a
@@ -184,19 +185,19 @@ const faqs = [
 		<section class="mt-16">
 			<div class="prose-content space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
 				<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
-					Why your images are bigger than they need to be
+					Why resizing matters more than people think
 				</h2>
 				<p>
-					The photo your phone or camera produces is almost always far larger than what the image actually needs. Cameras save every frame with generous quality headroom so you can edit or print later, and they embed full-resolution data even when the picture is destined for a web page, an email, or a chat where no one will ever look at it pixel-for-pixel. A 6MB JPEG that carries the same visible detail as a 600KB one is wasting 90% of its bytes — and those wasted bytes cost you storage, bandwidth, and load time everywhere you publish them.
+					A photo straight off a phone or camera is almost always the wrong size for where it's actually going. A 4000×3000 image is perfect for a print or a zoomed-in crop, but it's absurd for a blog hero, an email signature, a chat preview, or a product thumbnail where no one will ever see it larger than a few hundred pixels wide. Serving or sending all those extra pixels wastes bandwidth, makes pages slow, and bloats inboxes — for zero visible benefit. Resizing to the dimensions you actually need is the single highest-leverage thing you can do before an image goes anywhere.
 				</p>
 				<p>
-					<strong class="font-semibold text-neutral-900 dark:text-white">How this compressor works.</strong> When you drop an image in, the browser decodes it into memory and draws it onto a canvas. You pick a quality level with the slider, and the canvas is re-exported at that level using <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-slate-700">canvas.toBlob()</code> — the same encoder your browser uses internally, no third-party libraries involved. Lower quality throws away more high-frequency visual detail the eye barely registers, which is where the size savings come from. Because the whole thing is client-side, nothing is uploaded: the image stays on your device the entire time.
+					<strong class="font-semibold text-neutral-900 dark:text-white">How this resizer works.</strong> When you drop an image in, the browser decodes it into memory and draws it onto a canvas sized to your target. In Exact Dimensions mode you type the width and/or height in pixels; with "maintain aspect ratio" on, the missing dimension is computed from the source so nothing stretches. In Percentage Scale mode you drag a slider — 50% means half the pixels on each axis, roughly a quarter the total pixel count. The canvas is re-exported with <code class="rounded bg-neutral-100 px-1 py-0.5 text-xs dark:bg-slate-700">canvas.toBlob()</code> using the same encoder your browser uses internally — no third-party libraries, no server, nothing uploaded. The image stays on your device the entire time.
 				</p>
 				<p>
-					<strong class="font-semibold text-neutral-900 dark:text-white">Picking a quality level.</strong> For most photos, somewhere in the 70–80% range is the sweet spot: the file typically shrinks by 60–80% with no artifacts you can see at normal viewing distance. Below 50% you start to see blockiness in flat areas like skies and walls. The slider re-compresses live and shows you the before/after size as you drag, so you can stop exactly where the trade-off stops being worth it to you — rather than trusting a preset that someone else chose for a different image.
+					<strong class="font-semibold text-neutral-900 dark:text-white">Downscaling vs upscaling.</strong> Shrinking an image is visually lossless from your eye's perspective: the canvas resamples the source with high-quality smoothing, so a 4000×3000 photo reduced to 800×600 looks crisp and clean. Enlarging is the opposite — you're asking the encoder to invent pixels that don't exist, so the result softens. There's nothing wrong with a small upscale (say 120%), but pushing a small image up to wallpaper size will look fuzzy no matter which tool you use; that's the nature of scaling, not a limitation of this one. Resize toward the dimensions you need, not away from them.
 				</p>
 				<p>
-					One honest caveat: re-encoding through a canvas is lossy, and occasionally the "compressed" output ends up <em>larger</em> than the original — this happens when the input was already tiny or already saved at a low quality, so there's nothing left to discard. The tool shows that plainly with an "already small" note instead of pretending it shrank. And if you came here to reduce file size for privacy reasons specifically, the canvas re-encode does strip most EXIF as a side effect, but you shouldn't rely on that — use the dedicated metadata remover linked below to strip GPS and camera data at the byte level and see exactly what was removed.
+					And remember resizing only changes dimensions — it doesn't necessarily make the file much smaller on its own. A downsized image is usually smaller because there are fewer pixels to encode, but if file size specifically is your goal, run the result through the compressor linked above afterward. Likewise, resizing re-renders pixels through a canvas, which strips most metadata as a side effect — but if privacy is the goal, run it through the dedicated EXIF and GPS remover to be certain.
 				</p>
 			</div>
 		</section>
@@ -209,10 +210,10 @@ const faqs = [
 				</h2>
 				<div class="mt-4 space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
 					<p>
-						Drop a JPG, PNG, or WebP onto the tool (or click to browse). Set the output format — leave it on "Match input" to keep the same format, or switch to JPEG or WebP to re-encode lossily for a smaller file. Move the quality slider to target your trade-off between size and visible detail. The tool decodes the image locally, draws it to an off-screen canvas, and re-exports it at the chosen quality entirely in your browser, then shows the before/after file sizes and a percentage reduction. Download the compressed copy with one click.
+						Drop a JPG, PNG, or WebP onto the tool (or click to browse). Choose a mode: Exact Dimensions to set a specific width and height in pixels (with optional aspect-ratio lock), or Percentage Scale to shrink or enlarge by a percentage of the original. The tool decodes the image locally, redraws it onto an off-screen canvas at the target size with high-quality smoothing, and re-exports it entirely in your browser — then shows the original and new dimensions and file sizes. Download the resized copy with one click.
 					</p>
 					<p>
-						<strong class="font-semibold text-neutral-900 dark:text-white">No servers, no uploads.</strong> The Canvas API is built into every modern browser, so compression needs no npm image library and no backend. That keeps it instant, free, and private — your photos never travel across the network, and you can use the tool offline after the first page load.
+						<strong class="font-semibold text-neutral-900 dark:text-white">No servers, no uploads.</strong> The Canvas API is built into every modern browser, so resizing needs no npm image library and no backend. That keeps it instant, free, and private — your photos never travel across the network, and you can use the tool offline after the first page load.
 					</p>
 				</div>
 			</div>
