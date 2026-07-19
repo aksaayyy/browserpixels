@@ -69,7 +69,27 @@ const PRESETS: Preset[] = [
   { key: 'email-attachment', label: 'Email Attachment (Scale down 50%)', mode: 'percent', percent: 50 },
 ];
 
-export default function ImageResizer() {
+/**
+ * Props the pSEO landing pages pass in so the tool loads already configured to
+ * the long-tail keyword's target dimensions (e.g. 1080×1080 for the Instagram
+ * page). All optional — the default /resize-image page renders the component
+ * with no preset, exactly as before. Only the initial values are seeded; the
+ * user can still change everything afterwards (the fields are live).
+ */
+export interface ImageResizerProps {
+  /** 'exact' seeds exact width/height; 'percent' seeds a percentage scale. */
+  presetMode?: 'exact' | 'percent';
+  presetWidth?: number;
+  presetHeight?: number;
+  presetPercent?: number;
+}
+
+export default function ImageResizer({
+  presetMode,
+  presetWidth,
+  presetHeight,
+  presetPercent,
+}: ImageResizerProps = {}) {
   const [source, setSource] = useState<SourceInfo | null>(null);
   const [status, setStatus] = useState<Status>('ready');
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
@@ -86,6 +106,11 @@ export default function ImageResizer() {
   const [resultId, setResultId] = useState<string>('');
 
   const inputRef = useRef<HTMLInputElement>(null);
+  // Tracks that the pSEO preset seeded specific target dimensions/percent, so
+  // loadFile() knows not to overwrite them with the source's original dimensions
+  // on the first file load. Once the user edits a field themselves (which sets
+  // preset='custom'), this flips false and original-dimension seeding resumes.
+  const presetSeeded = useRef(false);
 
   // Clean up object URLs when the source/result changes or unmounts.
   const revokeUrl = (url?: string) => {
@@ -96,6 +121,27 @@ export default function ImageResizer() {
       revokeUrl(source?.previewUrl);
       revokeUrl(result?.outputUrl);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Seed the tool's initial state from the pSEO preset props once on mount.
+  // The main /resize-image page passes nothing and keeps the default 'Custom'
+  // blank state; a landing page like /resize-image-for-instagram passes
+  // presetMode='exact' + 1080×1080 so the user lands already configured and
+  // can drop a file in and resize in one step. The fields stay fully editable
+  // afterwards.
+  useEffect(() => {
+    if (presetMode === 'exact' && (presetWidth || presetHeight)) {
+      setMode('dimensions');
+      setMaintainAspect(false);
+      if (presetWidth) setWidthInput(String(presetWidth));
+      if (presetHeight) setHeightInput(String(presetHeight));
+      presetSeeded.current = true;
+    } else if (presetMode === 'percent' && typeof presetPercent === 'number') {
+      setMode('percent');
+      setPercent(presetPercent);
+      presetSeeded.current = true;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -130,9 +176,17 @@ export default function ImageResizer() {
       setResult(null);
       setStatus('ready');
       setErrorMessage(undefined);
-      // Seed width with the original so the user can tweak from a known number.
-      setWidthInput(String(dims.width));
-      setHeightInput(String(dims.height));
+      // Seed width/height with the original so the user can tweak from a known
+      // number — UNLESS a pSEO preset pre-configured the tool (e.g. the
+      // Instagram page lands with 1080×1080 filled in). In that case we keep
+      // the preset values so the page's promise ("already set, just drop and
+      // resize") holds on the first load. The user keeps the preset until they
+      // edit a field themselves, which clears it (see setPreset('custom') on
+      // the inputs) and re-enables original-dimension seeding on the next load.
+      if (!presetSeeded.current) {
+        setWidthInput(String(dims.width));
+        setHeightInput(String(dims.height));
+      }
       setSource({
         file,
         width: dims.width,
@@ -207,6 +261,7 @@ export default function ImageResizer() {
     setPercent(50);
     setMaintainAspect(true);
     setPreset('custom');
+    presetSeeded.current = false;
     if (inputRef.current) inputRef.current.value = '';
   };
 
@@ -215,6 +270,9 @@ export default function ImageResizer() {
     const p = PRESETS.find((x) => x.key === key);
     if (!p || key === 'custom') return;
     setMode(p.mode);
+    // Selecting a Quick Preset (vs. the pSEO mount preset) is a user action —
+    // clear the pSEO seed so a subsequent file load falls back to original dims.
+    presetSeeded.current = false;
     if (p.mode === 'dimensions') {
       setWidthInput(String(p.width ?? ''));
       setHeightInput(String(p.height ?? ''));
@@ -402,6 +460,7 @@ export default function ImageResizer() {
                     onClick={() => {
                       setMode(m);
                       setPreset('custom');
+                      presetSeeded.current = false;
                     }}
                     className={[
                       'rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors duration-300',
@@ -432,6 +491,7 @@ export default function ImageResizer() {
                       onChange={(e) => {
                         setWidthInput(e.target.value);
                         setPreset('custom');
+                        presetSeeded.current = false;
                       }}
                       className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors duration-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
@@ -448,6 +508,7 @@ export default function ImageResizer() {
                       onChange={(e) => {
                         setHeightInput(e.target.value);
                         setPreset('custom');
+                        presetSeeded.current = false;
                       }}
                       className="w-32 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition-colors duration-300 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
@@ -459,6 +520,7 @@ export default function ImageResizer() {
                       onChange={(e) => {
                         setMaintainAspect(e.target.checked);
                         setPreset('custom');
+                        presetSeeded.current = false;
                       }}
                       className="h-4 w-4 rounded accent-emerald-500"
                     />
@@ -496,6 +558,7 @@ export default function ImageResizer() {
                   onChange={(e) => {
                     setPercent(Number(e.target.value));
                     setPreset('custom');
+                    presetSeeded.current = false;
                   }}
                   className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-emerald-500 dark:bg-slate-700"
                 />
