@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	compressImage,
 	detectFormat,
@@ -65,7 +65,26 @@ const QUALITY_PRESETS: QualityPreset[] = [
 	{ key: 'max-compression', label: 'Maximum Compression — ~10%', quality: 10 },
 ];
 
-export default function ImageCompressor() {
+/**
+ * Props the pSEO landing pages pass in so the tool loads already configured to
+ * the long-tail keyword's target quality (e.g. ~45% for the "compress image to
+ * 1MB" page). All optional — the default /compress-image page renders the
+ * component with no preset, exactly as before. Only the initial values are
+ * seeded; the user can still drag the slider afterwards (a manual move snaps
+ * the Quick Presets dropdown back to "Custom Quality" — see the slider's
+ * onChange), so the live UI never lies about which preset is applied.
+ */
+export interface ImageCompressorProps {
+	/** Quality slider value (1–100) to seed on mount. */
+	presetQuality?: number;
+	/** Label matching a QUALITY_PRESETS entry, so the dropdown reflects it. */
+	presetLabel?: string;
+}
+
+export default function ImageCompressor({
+	presetQuality,
+	presetLabel,
+}: ImageCompressorProps = {}) {
 	const [items, setItems] = useState<CompressedItem[]>([]);
 	const [isDragging, setIsDragging] = useState(false);
 	const [quality, setQuality] = useState(80); // 1–100 (slider range), maps to 0–1
@@ -73,6 +92,26 @@ export default function ImageCompressor() {
 	const [outputFmt, setOutputFmt] = useState<CompressFormat | 'keep'>('keep');
 	const [busy, setBusy] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
+
+	// Seed the tool's initial state from the pSEO preset props once on mount.
+	// The main /compress-image page passes nothing and keeps the default 'Custom'
+	// blank state; a landing page like /compress-image-to-1mb passes
+	// presetQuality=45 (and the matching label) so the user lands with the
+	// slider already on the Small preset the page promised. The slider stays
+	// fully editable afterwards — a manual drag clears qualityPreset back to
+	// 'custom' (see the quality input's onChange), so a subsequent page-load
+	// re-compress uses whatever the user chose, not the stale seed.
+	useEffect(() => {
+		if (typeof presetQuality === 'number') {
+			setQuality(presetQuality);
+			// Reflect the seed in the Quick Presets dropdown by matching the
+			// supplied label to a known preset; fall back to 'custom' (which is
+			// what the slider would show anyway) if no match is passed.
+			const match = QUALITY_PRESETS.find((p) => p.label === presetLabel);
+			setQualityPreset(match?.key ?? 'custom');
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const revokeUrl = (url?: string) => {
 		if (url) URL.revokeObjectURL(url);
