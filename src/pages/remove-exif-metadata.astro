@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import MetadataStripper from '../components/MetadataStripper.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
+import { exifUseCases } from '../data/exif-use-cases';
 
 const faqs = [
 	{
@@ -82,6 +83,32 @@ const faqs = [
 		<!-- Tool card -->
 		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
 			<MetadataStripper client:only="react" />
+		</section>
+
+		<!-- Looking for something specific? — pSEO landing pages -->
+		<section class="mt-12">
+			<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+				Looking for something specific?
+			</h2>
+			<p class="mt-3 text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-base">
+				The tool above strips metadata from any photo the same way. If you came in looking for one of these specific scenarios, jump to the matching page:
+			</p>
+			<ul class="mt-5 flex flex-wrap gap-3">
+				{exifUseCases.map((u) => (
+					<li>
+						<a
+							href={`/${u.slug}`}
+							class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+						>
+							{u.h1}
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<line x1="5" y1="12" x2="19" y2="12" />
+								<polyline points="12 5 19 12 12 19" />
+							</svg>
+						</a>
+					</li>
+				))}
+			</ul>
 		</section>
 
 		<!-- Cross-link to the converter + compressor + resizer (funnel loop) -->

@@ -2,22 +2,26 @@
 import Layout from '../layouts/Layout.astro';
 import ImageResizer from '../components/ImageResizer.tsx';
 import ImageCompressor from '../components/ImageCompressor.tsx';
+import MetadataStripper from '../components/MetadataStripper.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
 import { resizeUseCases } from '../data/resize-use-cases';
 import { compressUseCases } from '../data/compress-use-cases';
+import { exifUseCases } from '../data/exif-use-cases';
 
-// Programmatic-SEO landing pages for both the Image Resizer and the Image
-// Compressor. One static page per use case is generated here from the two data
-// files; the URL is the use-case slug (e.g. browserpixels.com/resize-image-for-instagram
-// or .../compress-image-to-1mb). Each object carries a `tool` discriminator
-// ('resizer' | 'compressor') that decides which React component renders and how
-// the SEO copy / FAQ / cross-links are derived, so a single template serves
-// both tools without per-tool branches littering the markup.
+// Programmatic-SEO landing pages for the Image Resizer, the Image Compressor,
+// and the EXIF / metadata stripper. One static page per use case is generated
+// here from the three data files; the URL is the use-case slug. Each object
+// carries a `tool` discriminator ('resizer' | 'compressor' | 'exif') that
+// decides which React component renders and how the SEO copy / FAQ /
+// cross-links are derived, so a single template serves all three tools without
+// per-tool branches littering the markup. The EXIF tool takes no preset props
+// (it strips all metadata the same way every time), so it renders the bare
+// MetadataStripper component with no pre-configuration.
 export async function getStaticPaths() {
-	// Merge both sets into one path list. Both share a `slug` namespace, so
-	// any collision would surface as a duplicate-path build error — which is
+	// Merge all three sets into one path list. They share a `slug` namespace,
+	// so any collision would surface as a duplicate-path build error — which is
 	// what we want (slugs must stay unique across tools).
-	const all = [...resizeUseCases, ...compressUseCases];
+	const all = [...resizeUseCases, ...compressUseCases, ...exifUseCases];
 	return all.map((useCase) => ({
 		params: { slug: useCase.slug },
 		props: { useCase },
@@ -27,14 +31,17 @@ export async function getStaticPaths() {
 const { useCase } = Astro.props;
 const isResizer = useCase.tool === 'resizer';
 const isCompressor = useCase.tool === 'compressor';
+const isExif = useCase.tool === 'exif';
 
 // Tool-aware derived values. The resizer's "target" is a dimension or scale;
-// the compressor's is a quality level. The UI description, FAQs, feature list,
-// and the component preset props all branch on these typed handles so the union
-// type narrows cleanly (a bare boolean flag wouldn't narrow `ResizeUseCase |
-// CompressUseCase`, so we keep typed references the markup can use safely).
+// the compressor's is a quality level; the EXIF tool has no preset. The UI
+// description, FAQs, feature list, and the component preset props all branch
+// on these typed handles so the union type narrows cleanly (a bare boolean
+// flag wouldn't narrow `ResizeUseCase | CompressUseCase | ExifUseCase`, so we
+// keep typed references the markup can use safely).
 const resizer = isResizer ? (useCase as (typeof resizeUseCases)[number]) : null;
 const compressor = isCompressor ? (useCase as (typeof compressUseCases)[number]) : null;
+const exif = isExif ? (useCase as (typeof exifUseCases)[number]) : null;
 const targetLabel = resizer
 	? resizer.presetMode === 'percent'
 		? `${resizer.presetPercent}% scale`
@@ -59,21 +66,36 @@ const faqs = isResizer
 				answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you resize. It runs in your browser so there is no server cost to recover with fees or usage caps.',
 			},
 		]
-	: // isCompressor
-		[
-			{
-				question: `How do I compress an image to "${useCase.title}"?`,
-				answer: `Drop your JPG, PNG, or WebP onto the tool above. It loads already set to the quality preset this page targets (${compressorLabel}) — just click to compress and download the lighter copy. Everything runs in your browser, so the file is never uploaded, and you can drag the quality slider to fine-tune the size/quality trade-off before compressing.`,
-			},
-			{
-				question: 'Does this image compressor upload my photos?',
-				answer: 'No. Compression runs entirely on your device using the browser’s built-in Canvas API. Your image is decoded into memory, redrawn onto a canvas, and re-exported at the quality you chose — nothing is ever sent to a server. You can even use it offline once the page has loaded.',
-			},
-			{
-				question: `Is this ${useCase.title.toLowerCase()} tool free?`,
-				answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you compress. It runs in your browser so there is no server cost to recover with fees or usage caps.',
-			},
-		];
+	: isCompressor
+		? [
+				{
+					question: `How do I compress an image to "${useCase.title}"?`,
+					answer: `Drop your JPG, PNG, or WebP onto the tool above. It loads already set to the quality preset this page targets (${compressorLabel}) — just click to compress and download the lighter copy. Everything runs in your browser, so the file is never uploaded, and you can drag the quality slider to fine-tune the size/quality trade-off before compressing.`,
+				},
+				{
+					question: 'Does this image compressor upload my photos?',
+					answer: 'No. Compression runs entirely on your device using the browser’s built-in Canvas API. Your image is decoded into memory, redrawn onto a canvas, and re-exported at the quality you chose — nothing is ever sent to a server. You can even use it offline once the page has loaded.',
+				},
+				{
+					question: `Is this ${useCase.title.toLowerCase()} tool free?`,
+					answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you compress. It runs in your browser so there is no server cost to recover with fees or usage caps.',
+				},
+			]
+		: // isExif — no preset; the tool strips all metadata the same way
+			[
+				{
+					question: `How do I ${useCase.title.toLowerCase()}?`,
+					answer: `Drop your photo onto the tool above. It scans the file locally for EXIF, GPS, XMP, and IPTC metadata, lists whatever it found as tags, and produces a cleaned copy with that data removed. The image runs entirely in your browser — it is never uploaded — and the pixels are never re-encoded, so there is no quality loss.`,
+				},
+				{
+					question: 'Does removing metadata reduce image quality?',
+					answer: 'No. This tool edits the file at the byte level — it finds the exact metadata segments (EXIF, XMP, IPTC, PNG text chunks, WebP EXIF/XMP chunks) and cuts them out, leaving every pixel byte exactly as your camera produced it. That is different from tools that redraw your image onto a canvas and re-save it, which silently re-compresses JPEGs and visibly degrades quality.',
+				},
+				{
+					question: `Is this tool free?`,
+					answer: 'Yes, completely — no sign-up, no watermark, no limit on how many photos you clean. It runs in your browser so there is no server cost to recover with fees or file-count caps.',
+				},
+			];
 
 const SITE = 'https://browserpixels.com';
 const canonicalURL = new URL(`/${useCase.slug}/`, SITE).href;
@@ -84,12 +106,18 @@ const canonicalURL = new URL(`/${useCase.slug}/`, SITE).href;
 // so this section stays focused on the same tool's other presets.
 const siblingResizers = resizeUseCases.filter((u) => u.slug !== useCase.slug);
 const siblingCompressors = compressUseCases.filter((u) => u.slug !== useCase.slug);
+const siblingExif = exifUseCases.filter((u) => u.slug !== useCase.slug);
 
 // Hub link for the tool the page is about, used by the internal-link section
 // and the breadcrumb. The resizer's hub is /resize-image; the compressor's is
-// /compress-image.
-// breadcrumb; the cross-link block points at the OTHER hub.
-const hubPath = isResizer ? '/resize-image' : '/compress-image';
+// /compress-image; the EXIF stripper's hub is /remove-exif-metadata. The
+// cross-link block points at the OTHER tool's hub.
+const hubPath = isResizer ? '/resize-image' : isCompressor ? '/compress-image' : '/remove-exif-metadata';
+
+// One list of siblings from the current tool, used by both sections below: the
+// intro paragraph, chip list, and JSON-LD. The cross-TOOL pivot is handled by
+// the Funnel CTA further up, so these siblings stay scoped to the same tool.
+const siblingList = isResizer ? siblingResizers : isCompressor ? siblingCompressors : siblingExif;
 ---
 
 <Layout
@@ -98,7 +126,9 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 	keywords={
 		isResizer
 			? `resize image, ${useCase.title.toLowerCase()}, resize photo, image resizer, ${targetLabel}, free image resizer, resize image online`
-			: `image compressor, ${useCase.title.toLowerCase()}, compress image, reduce image file size, ${compressorLabel}, free image compressor, compress image online`
+			: isCompressor
+				? `image compressor, ${useCase.title.toLowerCase()}, compress image, reduce image file size, ${compressorLabel}, free image compressor, compress image online`
+				: `remove exif, ${useCase.title.toLowerCase()}, strip metadata, remove gps data, metadata remover, exif stripper, remove metadata online free`
 	}
 	canonicalPath={`/${useCase.slug}`}
 	ogImage="/web-app-manifest-512x512.png"
@@ -112,12 +142,19 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 					'100% client-side via the Canvas API',
 					'No uploads and no sign-up',
 				]
-			: [
-					`Compress at ${compressorLabel} quality`,
-					'Supports JPG, PNG, and WebP',
-					'100% client-side via the Canvas API',
-					'No uploads and no sign-up',
-				]
+			: isCompressor
+				? [
+						`Compress at ${compressorLabel} quality`,
+						'Supports JPG, PNG, and WebP',
+						'100% client-side via the Canvas API',
+						'No uploads and no sign-up',
+					]
+				: [
+						'Strip EXIF, GPS, XMP, and IPTC metadata',
+						'Byte-level removal — no re-encoding or quality loss',
+						'Supports JPG, PNG, and WebP',
+						'100% client-side, no uploads, no sign-up',
+					]
 	}
 	appIdSlug={`${useCase.slug}-app`}
 >
@@ -140,11 +177,16 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 						<path d="M3 9h18" />
 						<path d="M9 21V9" />
 					</svg>
-				) : (
+				) : isCompressor ? (
 					<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 						<polyline points="7 10 12 15 17 10" />
 						<line x1="12" y1="15" x2="12" y2="3" />
+					</svg>
+				) : (
+					<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+						<path d="M9 12l2 2 4-4" />
 					</svg>
 				)}
 			</div>
@@ -157,7 +199,8 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 			</p>
 		</section>
 
-		<!-- Tool card (pre-configured to the use-case dimensions / quality) -->
+		<!-- Tool card (pre-configured to the use-case dimensions / quality, or the
+		     bare metadata stripper which strips all metadata the same way) -->
 		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
 			{isResizer ? (
 				<ImageResizer
@@ -167,12 +210,14 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 					presetHeight={resizer!.presetHeight}
 					presetPercent={resizer!.presetPercent}
 				/>
-			) : (
+			) : isCompressor ? (
 				<ImageCompressor
 					client:only="react"
 					presetQuality={compressor!.presetQuality}
 					presetLabel={compressor!.presetLabel}
 				/>
+			) : (
+				<MetadataStripper client:only="react" />
 			)}
 		</section>
 
@@ -183,18 +228,24 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 				<p>
 					{isResizer
 						? 'The tool runs entirely in your browser using the Canvas API — your image is decoded locally, redrawn to the target size, and re-exported with one click. Nothing is uploaded, there’s no sign-up, and no watermark. That keeps it free and instant.'
-						: 'The tool runs entirely in your browser using the Canvas API — your image is decoded locally, re-encoded at the chosen quality, and downloaded with one click. Nothing is uploaded, there’s no sign-up, and no watermark. That keeps it free and instant.'}
+						: isCompressor
+							? 'The tool runs entirely in your browser using the Canvas API — your image is decoded locally, re-encoded at the chosen quality, and downloaded with one click. Nothing is uploaded, there’s no sign-up, and no watermark. That keeps it free and instant.'
+							: 'The tool runs entirely in your browser, parsing the actual file structure — JPEG markers, PNG chunks, or WebP RIFF chunks — and removing only the metadata-bearing segments. Nothing is uploaded, there’s no sign-up, and no watermark. Because the pixels are never re-encoded, the cleaned file stays at full original quality.'}
 				</p>
 			</div>
 		</section>
 
-		<!-- Funnel CTAs: cross-link the triangle (the "other" tool + EXIF stripper) -->
+		<!-- Funnel CTAs: cross-link the triangle. The sky block pivots to the
+		     tool that pairs naturally with the current one (resize↔compress, or
+		     EXIF→compress). On non-EXIF pages the amber block links to the EXIF
+		     stripper; on EXIF pages that would be redundant, so a resize pivot is
+		     shown there instead to keep all three tools interlinked. -->
 		<section class="mt-10 space-y-2">
 			<div class="overflow-hidden rounded-2xl border border-sky-200 bg-sky-50 px-5 py-5 transition-colors duration-300 dark:border-sky-900/60 dark:bg-sky-950/40 sm:px-6">
 				<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
 					<div class="flex items-center gap-3">
 						<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-sky-100 text-sky-700 transition-colors duration-300 dark:bg-sky-900/60 dark:text-sky-300">
-							{isResizer ? (
+							{isResizer || isExif ? (
 								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
 									<polyline points="7 10 12 15 17 10" />
@@ -211,16 +262,18 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 						<p class="text-sm text-sky-800 transition-colors duration-300 dark:text-sky-200 sm:text-base">
 							{isResizer ? (
 								<span><span class="font-semibold">Resized your image?</span> Now make it load instantly — compress it to a fraction of the file size.</span>
-							) : (
+							) : isCompressor ? (
 								<span><span class="font-semibold">Need specific dimensions?</span> Resize your image to exact pixels or a percentage scale before (or after) you compress.</span>
+							) : (
+								<span><span class="font-semibold">Metadata stripped?</span> Now shrink the file before you post it — compress it to a fraction of the size.</span>
 							)}
 						</p>
 					</div>
 					<a
-						href={isResizer ? '/compress-image' : '/resize-image'}
+						href={isCompressor ? '/resize-image' : '/compress-image'}
 						class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-400"
 					>
-						{isResizer ? 'Compress this image now' : 'Resize this image now'}
+						{isCompressor ? 'Resize this image now' : 'Compress this image now'}
 						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 							<line x1="5" y1="12" x2="19" y2="12" />
 							<polyline points="12 5 19 12 12 19" />
@@ -229,47 +282,78 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 				</div>
 			</div>
 
-			<div class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 transition-colors duration-300 dark:border-amber-900/60 dark:bg-amber-950/40 sm:px-6">
-				<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
-					<div class="flex items-center gap-3">
-						<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-amber-100 text-amber-700 transition-colors duration-300 dark:bg-amber-900/60 dark:text-amber-300">
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-								<line x1="12" y1="9" x2="12" y2="13" />
-								<line x1="12" y1="17" x2="12.01" y2="17" />
+			{isExif ? (
+				<div class="overflow-hidden rounded-2xl border border-violet-200 bg-violet-50 px-5 py-5 transition-colors duration-300 dark:border-violet-900/60 dark:bg-violet-950/40 sm:px-6">
+					<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+						<div class="flex items-center gap-3">
+							<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-violet-100 text-violet-700 transition-colors duration-300 dark:bg-violet-900/60 dark:text-violet-300">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<rect x="3" y="3" width="18" height="18" rx="2" />
+									<path d="M3 9h18" />
+									<path d="M9 21V9" />
+								</svg>
+							</span>
+							<p class="text-sm text-violet-800 transition-colors duration-300 dark:text-violet-200 sm:text-base">
+								<span class="font-semibold">Need exact dimensions too?</span> Resize your cleaned image to specific pixels or a percentage before you upload it.
+							</p>
+						</div>
+						<a
+							href="/resize-image"
+							class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-violet-700 dark:bg-violet-500 dark:hover:bg-violet-400"
+						>
+							Resize this image
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<line x1="5" y1="12" x2="19" y2="12" />
+								<polyline points="12 5 19 12 12 19" />
 							</svg>
-						</span>
-						<p class="text-sm text-amber-800 transition-colors duration-300 dark:text-amber-200 sm:text-base">
-							<span class="font-semibold">Protect your privacy.</span> Resized or not, your photo may still carry hidden GPS location and camera data — strip it.
-						</p>
+						</a>
 					</div>
-					<a
-						href="/remove-exif-metadata"
-						class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"
-					>
-						Strip EXIF & GPS Metadata
-						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<line x1="5" y1="12" x2="19" y2="12" />
-							<polyline points="12 5 19 12 12 19" />
-						</svg>
-					</a>
 				</div>
-			</div>
+			) : (
+				<div class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 transition-colors duration-300 dark:border-amber-900/60 dark:bg-amber-950/40 sm:px-6">
+					<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+						<div class="flex items-center gap-3">
+							<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-amber-100 text-amber-700 transition-colors duration-300 dark:bg-amber-900/60 dark:text-amber-300">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+									<line x1="12" y1="9" x2="12" y2="13" />
+									<line x1="12" y1="17" x2="12.01" y2="17" />
+								</svg>
+							</span>
+							<p class="text-sm text-amber-800 transition-colors duration-300 dark:text-amber-200 sm:text-base">
+								<span class="font-semibold">Protect your privacy.</span> Resized or not, your photo may still carry hidden GPS location and camera data — strip it.
+							</p>
+						</div>
+						<a
+							href="/remove-exif-metadata"
+							class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"
+						>
+							Strip EXIF & GPS Metadata
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<line x1="5" y1="12" x2="19" y2="12" />
+								<polyline points="12 5 19 12 12 19" />
+							</svg>
+						</a>
+					</div>
+				</div>
+			)}
 		</section>
 
 		<!-- Related use cases for the SAME tool (internal linking / topical depth) -->
 		<section class="mt-12">
 			<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
-				{isResizer ? 'Resize for other platforms' : 'Compress for other targets'}
+				{isResizer ? 'Resize for other platforms' : isCompressor ? 'Compress for other targets' : 'Clean metadata from other formats'}
 			</h2>
 			<p class="mt-3 text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-base">
 				{isResizer
 					? 'Looking for a different size? Try one of these pre-configured resizers:'
-					: 'Looking for a different file-size target? Try one of these pre-configured compressors:'}
+					: isCompressor
+						? 'Looking for a different file-size target? Try one of these pre-configured compressors:'
+						: 'Looking to strip metadata from a specific format? Try one of these:'}
 			</p>
 			<ul class="mt-5 flex flex-wrap gap-3">
 				{/* Same-tool siblings first (kept narrow to the tool the page is about) */}
-				{(isResizer ? siblingResizers : siblingCompressors).map((u) => (
+				{siblingList.map((u) => (
 					<li>
 						<a
 							href={`/${u.slug}`}
@@ -288,7 +372,7 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 						href={hubPath}
 						class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
 					>
-						{isResizer ? 'Full Image Resizer (custom sizes)' : 'Full Image Compressor (custom quality)'}
+						{isResizer ? 'Full Image Resizer (custom sizes)' : isCompressor ? 'Full Image Compressor (custom quality)' : 'Full EXIF & Metadata Stripper'}
 						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 							<line x1="5" y1="12" x2="19" y2="12" />
 							<polyline points="12 5 19 12 12 19" />
@@ -337,7 +421,7 @@ const hubPath = isResizer ? '/resize-image' : '/compress-image';
 				{
 					'@type': 'ListItem',
 					position: 1,
-					name: isResizer ? 'Image Resizer' : 'Image Compressor',
+					name: isResizer ? 'Image Resizer' : isCompressor ? 'Image Compressor' : 'EXIF & Metadata Stripper',
 					item: `${SITE}${hubPath}/`,
 				},
 				{
