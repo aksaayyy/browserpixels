@@ -20,6 +20,8 @@
 export type ResizePresetMode = 'exact' | 'percent';
 
 export interface ResizeUseCase {
+	/** Discriminator telling [slug].astro which React component to render. */
+	tool: 'resizer';
 	slug: string;
 	/** <title> text for the page. Keep under ~60 chars. */
 	title: string;
@@ -40,6 +42,7 @@ export interface ResizeUseCase {
 
 export const resizeUseCases: ResizeUseCase[] = [
 	{
+		tool: 'resizer',
 		slug: 'resize-image-for-instagram',
 		title: 'Resize Image for Instagram',
 		h1: 'Resize Image for Instagram (1080 x 1080)',
@@ -51,6 +54,7 @@ export const resizeUseCases: ResizeUseCase[] = [
 		copy: 'Instagram requires specific dimensions for posts and stories. If your image is too large, it crops awkwardly. Our tool automatically sets your image to 1080x1080 so it fits perfectly in your feed.',
 	},
 	{
+		tool: 'resizer',
 		slug: 'resize-image-for-discord-emoji',
 		title: 'Resize Image for Discord Emoji',
 		h1: 'Resize Image for Discord Emoji (128 x 128)',
@@ -62,6 +66,7 @@ export const resizeUseCases: ResizeUseCase[] = [
 		copy: 'Discord emojis must be exactly 128x128 pixels. Upload your image, and our tool will automatically apply the 128x128 preset so you can download it and upload it straight to your Discord server.',
 	},
 	{
+		tool: 'resizer',
 		slug: 'resize-image-for-twitter',
 		title: 'Resize Image for Twitter / X',
 		h1: 'Resize Image for Twitter / X (1600 x 900)',
@@ -73,6 +78,7 @@ export const resizeUseCases: ResizeUseCase[] = [
 		copy: 'Twitter / X renders single-image posts at a 16:9 ratio. Uploading an image already sized to 1600x900 means it shows full-width in the timeline without cropping or compression surprises. Drop your photo and the tool loads pre-set to 1600x900.',
 	},
 	{
+		tool: 'resizer',
 		slug: 'resize-image-to-1920x1080',
 		title: 'Resize Image to 1920x1080 (HD Wallpaper)',
 		h1: 'Resize Image to 1920 x 1080 (HD Wallpaper)',
@@ -84,6 +90,7 @@ export const resizeUseCases: ResizeUseCase[] = [
 		copy: 'A full-HD desktop wallpaper is 1920x1080 pixels. Our tool loads pre-configured to exactly that size, so you can drop in your photo and download a wallpaper-resolution image ready for a 1080p monitor.',
 	},
 	{
+		tool: 'resizer',
 		slug: 'resize-image-for-email',
 		title: 'Resize Image for Email',
 		h1: 'Resize Image for Email (Scale Down 50%)',

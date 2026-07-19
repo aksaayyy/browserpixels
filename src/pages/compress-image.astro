@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ImageCompressor from '../components/ImageCompressor.tsx';
 import ThemeToggle from '../components/ThemeToggle.tsx';
+import { compressUseCases } from '../data/compress-use-cases';
 
 const faqs = [
 	{
@@ -209,6 +210,32 @@ const faqs = [
 			<p class="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
 				Need to compress an image to 1MB or less? Use our 'Small (Email/Web)' preset to instantly reduce JPEG and PNG file sizes for email attachments or web uploads. If you need aggressive file reduction for a strict upload portal, the 'Maximum Compression' preset shrinks your images down to the smallest possible byte size while keeping them viewable.
 			</p>
+
+			<!-- Specific-target landing pages (internal links to the pSEO pages) -->
+			<div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 transition-colors duration-300 dark:border-emerald-900/60 dark:bg-emerald-950/20 sm:p-6">
+				<h3 class="text-sm font-semibold uppercase tracking-wide text-emerald-700 transition-colors duration-300 dark:text-emerald-300">
+					Looking for something specific?
+				</h3>
+				<p class="mt-1.5 text-sm text-neutral-600 transition-colors duration-300 dark:text-slate-300">
+					Each of these opens the tool already set to the right quality for that target:
+				</p>
+				<ul class="mt-4 flex flex-wrap gap-3">
+					{compressUseCases.map((u) => (
+						<li>
+							<a
+								href={`/${u.slug}`}
+								class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+							>
+								{u.h1}
+								<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<line x1="5" y1="12" x2="19" y2="12" />
+									<polyline points="12 5 19 12 12 19" />
+								</svg>
+							</a>
+						</li>
+					))}
+				</ul>
+			</div>
 		</section>
 
 		<section class="mt-16 space-y-10">
