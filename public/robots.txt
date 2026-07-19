@@ -1,4 +1,24 @@
 User-agent: *
 Allow: /
 
+# Hygiene: keep honest crawlers off paths that never carry public
+# content here. Note: only well-behaved bots obey robots.txt —
+# malicious scanners ignore it, so these Disallow lines are NOT
+# enforcement. Real enforcement for scanner traffic is a Cloudflare
+# WAF custom rule (see SECURITY.md). The Disallow entries stop the
+# 404 noise that legitimate crawlers would otherwise generate against
+# well-known probe paths.
+Disallow: /.env
+Disallow: /.git/
+Disallow: /.aws/
+Disallow: /.ssh/
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /wp-config.php
+Disallow: /xmlrpc.php
+Disallow: /cgi-bin/
+Disallow: /vendor/
+Disallow: /node_modules/
+
 Sitemap: https://browserpixels.com/sitemap-index.xml
+Sitemap: https://browserpixels.com/sitemap.xml

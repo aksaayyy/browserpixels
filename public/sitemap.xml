@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Static alias of the @astrojs/sitemap-generated sitemap-index.xml.
+     Many bots and SEO tools probe /sitemap.xml by convention; without
+     this file those probes 404. Keep this in sync with the generated
+     sitemap-index.xml if more sitemap chunks are added later (the
+     integration currently emits a single sitemap-0.xml). -->
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+	<sitemap>
+		<loc>https://browserpixels.com/sitemap-0.xml</loc>
+	</sitemap>
+</sitemapindex>

@@ -1,0 +1,60 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ThemeToggle from '../components/ThemeToggle.tsx';
+
+// Static 404 rendered to dist/404.html. Cloudflare Workers Static
+// Assets serves it for any missing path because wrangler.toml sets
+// `not_found_handling = "404-page"`. Kept free of client: directives
+// so the response itself is cacheable at the edge. noindex keeps the
+// error page out of search results.
+---
+
+<Layout
+	title="Page not found — browserpixels"
+	description="The page you were looking for doesn't exist. Browse browserpixels' free, private image tools: resize, compress, and strip EXIF metadata — all in your browser."
+	canonicalPath="/404"
+	noindex={true}
+>
+	<div class="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
+		<ThemeToggle client:load />
+	</div>
+
+	<main class="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-5 py-20 text-center transition-colors duration-300">
+		<p class="text-6xl font-bold tracking-tight text-emerald-500 transition-colors duration-300 dark:text-emerald-400 sm:text-7xl">
+			404
+		</p>
+		<h1 class="mt-4 text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+			This page isn't here
+		</h1>
+		<p class="mt-3 max-w-md text-base text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-lg">
+			The link may be broken, or the page may have moved. Try one of our free, private image tools below — everything runs in your browser, nothing is uploaded.
+		</p>
+
+		<nav aria-label="Available tools" class="mt-8 flex flex-wrap items-center justify-center gap-3">
+			<a
+				href="/"
+				class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+			>
+				Go home
+			</a>
+			<a
+				href="/resize-image"
+				class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+			>
+				Resize Image
+			</a>
+			<a
+				href="/compress-image"
+				class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+			>
+				Compress Image
+			</a>
+			<a
+				href="/remove-exif-metadata"
+				class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+			>
+				Strip EXIF Metadata
+			</a>
+		</nav>
+	</main>
+</Layout>
