@@ -1,0 +1,261 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ImageResizer from '../components/ImageResizer.tsx';
+import ThemeToggle from '../components/ThemeToggle.tsx';
+import { resizeUseCases } from '../data/resize-use-cases';
+
+// Programmatic-SEO landing pages for the Image Resizer. One static page per
+// use case in src/data/resize-use-cases.ts is generated here; the URL is the
+// use-case slug (e.g. browserpixels.com/resize-image-for-instagram). The
+// ImageResizer component is rendered with the preset props so it loads already
+// configured to the keyword's target dimensions.
+export async function getStaticPaths() {
+	return resizeUseCases.map((useCase) => ({
+		params: { slug: useCase.slug },
+		props: { useCase },
+	}));
+}
+
+const { useCase } = Astro.props;
+
+// Per-page FAQs are derived from the use case so the FAQPage JSON-LD stays in
+// sync with the visible text. Keep these factual and tied to the preset.
+const targetLabel =
+	useCase.presetMode === 'percent'
+		? `${useCase.presetPercent}% scale`
+		: `${useCase.presetWidth}×${useCase.presetHeight}`;
+
+const faqs = [
+	{
+		question: `How do I resize an image to ${targetLabel}?`,
+		answer: `Drop your JPG, PNG, or WebP onto the tool above. It loads already set to ${targetLabel} for the "${useCase.title}" preset — just click Resize Image and download the result. Everything runs in your browser, so the file is never uploaded, and you can tweak the dimensions manually first if you need a different size.`,
+	},
+	{
+		question: 'Does this resizer upload my photo?',
+		answer: 'No. Resizing runs entirely on your device using the browser’s built-in Canvas API. Your image is decoded into memory, drawn onto a canvas at the target size, and re-exported — nothing is ever sent to a server. You can even use the tool offline once the page has loaded.',
+	},
+	{
+		question: `Is this ${useCase.title.toLowerCase()} tool free?`,
+		answer: 'Yes, completely — no sign-up, no watermark, no limit on how many images you resize. It runs in your browser so there is no server cost to recover with fees or usage caps.',
+	},
+];
+
+const SITE = 'https://browserpixels.com';
+const canonicalURL = new URL(`/${useCase.slug}/`, SITE).href;
+
+// Cross-link the other pSEO use cases for internal linking / topical depth.
+const otherUseCases = resizeUseCases.filter((u) => u.slug !== useCase.slug);
+---
+
+<Layout
+	title={useCase.title}
+	description={useCase.description}
+	keywords={`resize image, ${useCase.title.toLowerCase()}, resize photo, image resizer, ${targetLabel}, free image resizer, resize image online`}
+	canonicalPath={`/${useCase.slug}`}
+	ogImage="/web-app-manifest-512x512.png"
+	appName={useCase.title}
+	appDescription={useCase.description}
+	appFeatureList={[
+		`Resize to ${targetLabel}`,
+		'Supports JPG, PNG, and WebP',
+		'100% client-side via the Canvas API',
+		'No uploads and no sign-up',
+	]}
+	appIdSlug={`${useCase.slug}-app`}
+>
+	<div class="fixed right-4 top-4 z-50 sm:right-6 sm:top-6">
+		<ThemeToggle client:load />
+	</div>
+
+	<main class="mx-auto flex min-h-screen max-w-3xl flex-col px-5 py-14 transition-colors duration-300 sm:py-20">
+		<!-- Hero -->
+		<section class="flex flex-col items-center text-center">
+			<div class="mb-6 flex items-center gap-2.5 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-medium text-emerald-700 transition-colors duration-300 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300">
+				<span class="flex h-2 w-2 rounded-full bg-emerald-500" />
+				100% Private · Nothing leaves your device
+			</div>
+
+			<div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/25 transition-colors duration-300 dark:bg-emerald-400 dark:shadow-emerald-500/40">
+				<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<rect x="3" y="3" width="18" height="18" rx="2" />
+					<path d="M3 9h18" />
+					<path d="M9 21V9" />
+				</svg>
+			</div>
+
+			<h1 class="mt-6 text-3xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-4xl">
+				{useCase.h1}
+			</h1>
+			<p class="mt-3 max-w-xl text-base text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-lg">
+				{useCase.description}
+			</p>
+		</section>
+
+		<!-- Tool card (pre-configured to the use-case dimensions) -->
+		<section class="mt-10 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition-colors duration-300 dark:border-slate-700 dark:bg-slate-800 sm:p-7">
+			<ImageResizer
+				client:only="react"
+				presetMode={useCase.presetMode}
+				presetWidth={useCase.presetWidth}
+				presetHeight={useCase.presetHeight}
+				presetPercent={useCase.presetPercent}
+			/>
+		</section>
+
+		<!-- Use-case copy -->
+		<section class="mt-10">
+			<div class="space-y-4 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:text-base">
+				<p>{useCase.copy}</p>
+				<p>
+					The tool runs entirely in your browser using the Canvas API — your image is decoded locally, redrawn to the target size, and re-exported with one click. Nothing is uploaded, there's no sign-up, and no watermark. That keeps it free and instant.
+				</p>
+			</div>
+		</section>
+
+		<!-- Funnel CTAs: cross-link the triangle (Compressor + EXIF stripper) -->
+		<section class="mt-10 space-y-2">
+			<div class="overflow-hidden rounded-2xl border border-sky-200 bg-sky-50 px-5 py-5 transition-colors duration-300 dark:border-sky-900/60 dark:bg-sky-950/40 sm:px-6">
+				<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+					<div class="flex items-center gap-3">
+						<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-sky-100 text-sky-700 transition-colors duration-300 dark:bg-sky-900/60 dark:text-sky-300">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+								<polyline points="7 10 12 15 17 10" />
+								<line x1="12" y1="15" x2="12" y2="3" />
+							</svg>
+						</span>
+						<p class="text-sm text-sky-800 transition-colors duration-300 dark:text-sky-200 sm:text-base">
+							<span class="font-semibold">Resized your image?</span> Now make it load instantly — compress it to a fraction of the file size.
+						</p>
+					</div>
+					<a
+						href="/compress-image"
+						class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-400"
+					>
+						Compress this image now
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<line x1="5" y1="12" x2="19" y2="12" />
+							<polyline points="12 5 19 12 12 19" />
+						</svg>
+					</a>
+				</div>
+			</div>
+
+			<div class="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 transition-colors duration-300 dark:border-amber-900/60 dark:bg-amber-950/40 sm:px-6">
+				<div class="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
+					<div class="flex items-center gap-3">
+						<span class="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-amber-100 text-amber-700 transition-colors duration-300 dark:bg-amber-900/60 dark:text-amber-300">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+								<line x1="12" y1="9" x2="12" y2="13" />
+								<line x1="12" y1="17" x2="12.01" y2="17" />
+							</svg>
+						</span>
+						<p class="text-sm text-amber-800 transition-colors duration-300 dark:text-amber-200 sm:text-base">
+							<span class="font-semibold">Protect your privacy.</span> Resized or not, your photo may still carry hidden GPS location and camera data — strip it.
+						</p>
+					</div>
+					<a
+						href="/remove-exif-metadata"
+						class="inline-flex flex-none items-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-300 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"
+					>
+						Strip EXIF & GPS Metadata
+						<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<line x1="5" y1="12" x2="19" y2="12" />
+							<polyline points="12 5 19 12 12 19" />
+						</svg>
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<!-- Related resizer use cases (internal linking) -->
+		<section class="mt-12">
+			<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+				Resize for other platforms
+			</h2>
+			<p class="mt-3 text-sm text-neutral-500 transition-colors duration-300 dark:text-slate-400 sm:text-base">
+				Looking for a different size? Try one of these pre-configured resizers:
+			</p>
+			<ul class="mt-5 flex flex-wrap gap-3">
+				{otherUseCases.map((u) => (
+					<li>
+						<a
+							href={`/${u.slug}`}
+							class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+						>
+							{u.title}
+							<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<line x1="5" y1="12" x2="19" y2="12" />
+								<polyline points="12 5 19 12 12 19" />
+							</svg>
+						</a>
+					</li>
+				))}
+				<li>
+					<a
+						href="/resize-image"
+						class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 transition-colors duration-300 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+					>
+						Full Image Resizer (custom sizes)
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<line x1="5" y1="12" x2="19" y2="12" />
+							<polyline points="12 5 19 12 12 19" />
+						</svg>
+					</a>
+				</li>
+			</ul>
+		</section>
+
+		<!-- FAQ -->
+		<section class="mt-16">
+			<h2 class="text-2xl font-bold tracking-tight text-neutral-900 transition-colors duration-300 dark:text-white sm:text-3xl">
+				Frequently asked questions
+			</h2>
+			<div class="mt-5 divide-y divide-neutral-200 overflow-hidden rounded-2xl border border-neutral-200 transition-colors duration-300 dark:divide-slate-700 dark:border-slate-700">
+				{faqs.map((faq) => (
+					<details class="group bg-white transition-colors duration-300 open:bg-neutral-50 dark:bg-slate-800 dark:open:bg-slate-700/40">
+						<summary class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-sm font-semibold text-neutral-900 transition-colors duration-300 hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:ring-inset dark:text-white dark:hover:bg-slate-700/40 sm:px-6 sm:text-base">
+							<span>{faq.question}</span>
+							<svg class="h-5 w-5 flex-none text-neutral-400 transition-transform duration-300 group-open:rotate-180 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<polyline points="6 9 12 15 18 9" />
+							</svg>
+						</summary>
+						<div class="px-5 pb-5 pt-0 text-sm leading-relaxed text-neutral-600 transition-colors duration-300 dark:text-slate-300 sm:px-6 sm:text-base">
+							{faq.answer}
+						</div>
+					</details>
+				))}
+			</div>
+		</section>
+
+		<script type="application/ld+json" is:inline set:html={JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'FAQPage',
+			mainEntity: faqs.map((faq) => ({
+				'@type': 'Question',
+				name: faq.question,
+				acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+			})),
+		})} />
+
+		<script type="application/ld+json" is:inline set:html={JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'BreadcrumbList',
+			itemListElement: [
+				{
+					'@type': 'ListItem',
+					position: 1,
+					name: 'Image Resizer',
+					item: `${SITE}/resize-image/`,
+				},
+				{
+					'@type': 'ListItem',
+					position: 2,
+					name: useCase.title,
+					item: canonicalURL,
+				},
+			],
+		})} />
+	</main>
+</Layout>
